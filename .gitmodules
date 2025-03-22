@@ -1,3 +1,6 @@
 [submodule "softcam"]
 	path = softcam
 	url = https://github.com/tshino/softcam.git
+[submodule "asio"]
+	path = asio
+	url = https://github.com/chriskohlhoff/asio.git
