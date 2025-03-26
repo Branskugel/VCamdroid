@@ -3,9 +3,10 @@
 
 #include <thread>
 
-Camera::Camera() : image(300, 250)
+Camera::Camera() : image(WIDTH, HEIGHT)
 {
 	server = std::make_unique<Server>(*this);
+	server->Start();
 }
 
 void Camera::OnClientConnected()
@@ -19,10 +20,8 @@ void Camera::OnClientDisconnected()
 void Camera::OnBytesReceived(std::vector<unsigned char> bytes) const
 {
 	unsigned char* data = image.GetData();
-	int width = 300;
-	int height = 250;
 
-	for (int i = 0; i < width * height * 3; i++)
+	for (int i = 0; i < bytes.size(); i++)
 	{
 		data[i] = bytes[i];
 	}

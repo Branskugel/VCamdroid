@@ -2,7 +2,7 @@
 
 #include <wx/dcbuffer.h>
 
-Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size) : wxPanel(parent, wxID_ANY, position, size), bitmap(300, 250)
+Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size) : wxPanel(parent, wxID_ANY, position, size), bitmap(640, 480)
 {
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 	this->Bind(wxEVT_PAINT, &Canvas::OnPaint, this);

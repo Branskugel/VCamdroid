@@ -1,64 +1,65 @@
 #include "server.h"
 
-#include <asio.hpp>
-
-Server::Server(const IServerListener& listener)
+Server::Server(const IServerListener& listener) :
+	listener(listener),
+	socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), 13))
 {
-	tShouldClose = false;
-	thread = std::thread([&]() {
+	bytesReceived = 0;
+	buf = new unsigned char[640 * 480 * 3];
 
-		try
-		{
-			asio::io_context context;
-			asio::ip::udp::socket socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), 13));
-
-			while (!tShouldClose)
-			{
-				std::vector<unsigned char> buf(250 * 300 * 3);
-				
-				asio::ip::udp::endpoint remote_endpoint;
-				socket.receive_from(asio::buffer(buf), remote_endpoint);
-
-				listener.OnBytesReceived(buf);
-			}
-		}
-		catch (std::exception e)
-		{
-
-		}
-	});
+	StartReceive();
+}
 
 
-	/*tShouldClose = false;
-	thread = std::thread([&]() {
+void Server::Start()
+{
+	try
+	{
+		thread = std::thread([this]() {
+			context.run();
+		});
+	}
+	catch (std::exception e)
+	{
 
-		int it = 0;
-		std::vector<unsigned char> bytes;
-
-		while (!tShouldClose && it < 100000)
-		{
-			bytes.clear();
-			for (int i = 0; i < 300 * 250; i++)
-			{
-				bytes.push_back(rand() % 255);
-				bytes.push_back(rand() % 255);
-				bytes.push_back(rand() % 255);
-			}
-
-			listener.OnBytesReceived(bytes);
-
-			it++;
-			std::this_thread::sleep_for(std::chrono::milliseconds(30));
-		}
-	});
-	*/
+	}
 }
 
 void Server::Close()
 {
-	tShouldClose = true;
+	socket.close();
+	context.stop();
+
 	if (thread.joinable())
 	{
 		thread.join();
+	}
+}
+
+void Server::StartReceive()
+{
+	socket.async_receive_from(
+		asio::buffer(buf + bytesReceived, 640 * 480 * 3 - bytesReceived),
+		remote_endpoint,
+		std::bind(&Server::HandleReceive, this, std::placeholders::_1, std::placeholders::_2)
+	);
+}
+
+void Server::HandleReceive(const std::error_code& ec, size_t bytesReceived)
+{
+	if (!ec)
+	{
+		this->bytesReceived += bytesReceived;
+
+		if (this->bytesReceived >= 921600)
+		{
+			std::vector<unsigned char> buffer(buf, buf + 900000);
+			listener.OnBytesReceived(buffer);
+			this->bytesReceived = 0;
+		}
+
+		socket.send_to(asio::buffer("done"), remote_endpoint);
+
+		StartReceive();
 	}
 }

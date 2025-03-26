@@ -13,6 +13,9 @@ class Camera : public IServerListener
 public:
 	using OnFrameReadyCallback = std::function<void(const wxImage& image)>;
 
+	static const int WIDTH = 640;
+	static const int HEIGHT = 480;
+
 	Camera();
 	
 	virtual void OnClientConnected() override;

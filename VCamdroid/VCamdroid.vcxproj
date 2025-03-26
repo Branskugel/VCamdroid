@@ -107,7 +107,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)softcam\dist\include;$(SolutionDir)asio\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)softcam\dist\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>softcam.lib;%(AdditionalDependencies)</AdditionalDependencies>

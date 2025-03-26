@@ -10,7 +10,7 @@ Window::Window(const char* title, int width, int height, long style)
 	wxPanel* panel = new wxPanel(this, wxID_ANY);
 	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
-	canvas = new Canvas(panel, wxDefaultPosition, wxSize(400, 300));
+	canvas = new Canvas(panel, wxDefaultPosition, wxSize(640, 480));
 
 	topsizer->Add(canvas);
 	panel->SetSizerAndFit(topsizer);
