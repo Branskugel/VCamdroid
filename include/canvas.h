@@ -12,6 +12,8 @@ public:
 private:
 	wxSize size;
 	wxBitmap bitmap;
+
+	bool shouldDraw = false;
 	
 	void OnPaint(wxPaintEvent& event);
 };

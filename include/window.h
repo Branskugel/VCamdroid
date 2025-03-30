@@ -15,5 +15,7 @@ private:
 	
 	Canvas* canvas;
 	
-	wxStaticBoxSizer* InitializeControlPanel(wxPanel* parent);
+	void InitializeMenu();
+	void InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer);
+	void InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer);
 };

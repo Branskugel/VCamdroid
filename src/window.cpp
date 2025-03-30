@@ -6,38 +6,88 @@
 #include <wx/artprov.h>
 
 Window::Window()
-	: wxFrame(nullptr, wxID_ANY, "VCamdroid", wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE & ~wxMAXIMIZE_BOX & ~wxRESIZE_BORDER)
+	: wxFrame(nullptr, wxID_ANY, "VCamdroid", wxDefaultPosition, wxSize(500, 450), wxDEFAULT_FRAME_STYLE & ~wxMAXIMIZE_BOX & ~wxRESIZE_BORDER)
 {
 	wxPanel* panel = new wxPanel(this, wxID_ANY);
-
 	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
-	canvas = new Canvas(panel, wxDefaultPosition, wxSize(320, 240));
-	topsizer->Add(canvas, 0, wxALL | wxALIGN_CENTER_HORIZONTAL);
-
-	auto controlPanel = InitializeControlPanel(panel);
-	topsizer->Add(controlPanel);
+	InitializeMenu();
+	InitializeCanvasPanel(panel, topsizer);
+	InitializeControlPanel(panel, topsizer);
 
 	panel->SetSizerAndFit(topsizer);
 }
 
-wxStaticBoxSizer* Window::InitializeControlPanel(wxPanel* parent)
+void Window::InitializeMenu()
 {
-	wxStaticBoxSizer* sizer = new wxStaticBoxSizer(wxHORIZONTAL, parent, "Controls");
+	wxMenuBar* menuBar = new wxMenuBar();
 
-	wxButton* button1 = new wxButton(parent, wxID_ANY, "ZOOM IN (+)");
-	sizer->Add(button1);
+	wxMenu* file = new wxMenu();
+	file->AppendCheckItem(wxID_ANY, "Hide to tray");
+	file->AppendCheckItem(wxID_ANY, "Run at startup");
+	file->Append(wxID_ANY, "About");
+	file->AppendSeparator();
+	file->Append(wxID_ANY, "Exit");
+	menuBar->Append(file, "File");
 
-	wxButton* button2 = new wxButton(parent, wxID_ANY, "ZOOM OUT (-)");
-	sizer->Add(button2);
+	wxMenu* connect = new wxMenu();
+	connect->Append(wxID_ANY, "QR Code");
+	connect->AppendSeparator();
+	connect->Append(wxID_ANY, "IP:\t192.xxx.xxx.1");
+	connect->Append(wxID_ANY, "Port:\t6969");
+	menuBar->Append(connect, "Connect");
 
-	wxButton* button3 = new wxButton(parent, wxID_ANY, "WB");
-	sizer->Add(button3);
+	wxMenu* devices = new wxMenu();
+	devices->Append(wxID_ANY, "See connected devices");
+	menuBar->Append(devices, "Devices");
 
-	wxButton* button4 = new wxButton(parent, wxID_ANY, "CONTRAST");
-	sizer->Add(button4);
 
-	return sizer;
+	SetMenuBar(menuBar);
+}
+
+void Window::InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer)
+{
+	canvas = new Canvas(parent, wxDefaultPosition, wxSize(400, 300));
+	topsizer->Add(canvas, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+}
+
+void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
+{
+	wxGridSizer* sizer = new wxGridSizer(1, 2, 0, 5);
+	
+	wxFlexGridSizer* settingsSizer = new wxFlexGridSizer(2, 2, 5, 5);
+
+	wxChoice* sourceChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3]{ "Device #1", "Device #2", "Device #3" });
+	settingsSizer->Add(new wxStaticText(parent, wxID_ANY, "Source"), 0, wxALL | wxALIGN_CENTER_VERTICAL);
+	settingsSizer->Add(sourceChoice);
+
+	wxChoice* resolutionChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3] {"640x480", "(HD) 1280x720", "(FHD) 1920x1080"});
+	settingsSizer->Add(new wxStaticText(parent, wxID_ANY, "Resolution"), 0, wxALL | wxALIGN_CENTER_VERTICAL);
+	settingsSizer->Add(resolutionChoice);
+
+
+
+	wxStaticBoxSizer* controlsSizer = new wxStaticBoxSizer(wxHORIZONTAL, parent, "Controls");
+
+	wxBitmapButton* button1 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/rotate-left.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(button1, 0, wxRIGHT, 5);
+
+	wxBitmapButton* button2 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/rotate-right.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(button2, 0, wxRIGHT, 5);
+
+	wxBitmapButton* button3 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/flip.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(button3, 0, wxRIGHT, 5);
+
+	wxBitmapButton* button4 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/settings.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(button4, 0, wxRIGHT, 10);
+
+	wxBitmapButton* button5 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/photo.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(button5);
+
+
+	sizer->Add(settingsSizer, 0, wxALIGN_CENTER_VERTICAL);
+	sizer->Add(controlsSizer, 0, wxALIGN_CENTER_VERTICAL);
+	topsizer->Add(sizer, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 20);
 }
 
 Canvas* Window::GetCanvas()

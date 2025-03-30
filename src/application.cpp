@@ -2,12 +2,10 @@
 
 #include "window.h"
 
-#include <wx/artprov.h>
-
 Application::Application()
 {
 	wxInitAllImageHandlers();
-	wxArtProvider::Push(new wxArtProvider);
+	//wxImageHandler::
 
 	mainWindow = new Window();
 	camera = std::make_unique<Camera>();
