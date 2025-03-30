@@ -2,7 +2,7 @@
 
 #include <wx/dcbuffer.h>
 
-Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size) : wxPanel(parent, wxID_ANY, position, size), bitmap(640, 480)
+Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size) : wxPanel(parent, wxID_ANY, position, size, wxSIMPLE_BORDER), size(size), bitmap(size.x, size.y)
 {
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 	this->Bind(wxEVT_PAINT, &Canvas::OnPaint, this);
@@ -10,7 +10,7 @@ Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size) : wxPanel(parent
 
 void Canvas::Render(const wxImage& image)
 {
-	this->bitmap = wxBitmap(image);
+	this->bitmap = wxBitmap(image.Scale(size.x, size.y));
 	this->Refresh();
 	this->Update();
 }

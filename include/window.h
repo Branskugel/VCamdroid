@@ -7,9 +7,13 @@
 class Window : public wxFrame
 {
 public:
-	Window(const char* title, int width, int height, long style);
+	Window();
 
 	Canvas* GetCanvas();
+
 private:
+	
 	Canvas* canvas;
+	
+	wxStaticBoxSizer* InitializeControlPanel(wxPanel* parent);
 };

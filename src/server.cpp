@@ -10,7 +10,6 @@ Server::Server(const IServerListener& listener) :
 	StartReceive();
 }
 
-
 void Server::Start()
 {
 	try

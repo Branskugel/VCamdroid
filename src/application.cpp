@@ -1,9 +1,15 @@
 #include "application.h"
+
 #include "window.h"
+
+#include <wx/artprov.h>
 
 Application::Application()
 {
-	mainWindow = new Window("VCamdroid", 600, 400, wxDEFAULT_FRAME_STYLE & ~wxMAXIMIZE_BOX);
+	wxInitAllImageHandlers();
+	wxArtProvider::Push(new wxArtProvider);
+
+	mainWindow = new Window();
 	camera = std::make_unique<Camera>();
 
 	camera->SetOnFrameReady([&](const wxImage& image) {

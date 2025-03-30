@@ -10,6 +10,7 @@ public:
 	void Render(const wxImage& image);
 
 private:
+	wxSize size;
 	wxBitmap bitmap;
 	
 	void OnPaint(wxPaintEvent& event);
