@@ -57,11 +57,11 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	
 	wxFlexGridSizer* settingsSizer = new wxFlexGridSizer(2, 2, 5, 5);
 
-	wxChoice* sourceChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3]{ "Device #1", "Device #2", "Device #3" });
+	sourceChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3]{ "Device #1", "Device #2", "Device #3" });
 	settingsSizer->Add(new wxStaticText(parent, wxID_ANY, "Source"), 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	settingsSizer->Add(sourceChoice);
 
-	wxChoice* resolutionChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3] {"640x480", "(HD) 1280x720", "(FHD) 1920x1080"});
+	resolutionChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3] {"640x480", "(HD) 1280x720", "(FHD) 1920x1080"});
 	settingsSizer->Add(new wxStaticText(parent, wxID_ANY, "Resolution"), 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	settingsSizer->Add(resolutionChoice);
 
@@ -69,20 +69,20 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 
 	wxStaticBoxSizer* controlsSizer = new wxStaticBoxSizer(wxHORIZONTAL, parent, "Controls");
 
-	wxBitmapButton* button1 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/rotate-left.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(button1, 0, wxRIGHT, 5);
+	rotateLeftButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/rotate-left.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(rotateLeftButton, 0, wxRIGHT, 5);
 
-	wxBitmapButton* button2 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/rotate-right.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(button2, 0, wxRIGHT, 5);
+	rotateRightButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/rotate-right.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(rotateRightButton, 0, wxRIGHT, 5);
 
-	wxBitmapButton* button3 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/flip.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(button3, 0, wxRIGHT, 5);
+	flipButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/flip.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(flipButton, 0, wxRIGHT, 5);
 
-	wxBitmapButton* button4 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/settings.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(button4, 0, wxRIGHT, 10);
+	settingsButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/settings.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(settingsButton, 0, wxRIGHT, 10);
 
-	wxBitmapButton* button5 = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/photo.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(button5);
+	photoButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/photo.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(photoButton);
 
 
 	sizer->Add(settingsSizer, 0, wxALIGN_CENTER_VERTICAL);
@@ -93,4 +93,39 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 Canvas* Window::GetCanvas()
 {
 	return canvas;
+}
+
+wxChoice* Window::GetSourceChoice()
+{
+	return sourceChoice;
+}
+
+wxChoice* Window::GetResolutionChoice()
+{
+	return resolutionChoice;
+}
+
+wxButton* Window::GetRotateLeftButton()
+{
+	return rotateLeftButton;
+}
+
+wxButton* Window::GetRotateRightButton()
+{
+	return rotateRightButton;
+}
+
+wxButton* Window::GetFlipButton()
+{
+	return flipButton;
+}
+
+wxButton* Window::GetSettingsButton()
+{
+	return settingsButton;
+}
+
+wxButton* Window::GetPhotoButton()
+{
+	return photoButton;
 }
