@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include "window.h"
+#include "logger.h"
 
 Application::Application()
 {
@@ -15,6 +16,22 @@ Application::Application()
 
 	camera->SetOnFrameReady([&](const wxImage& image) {
 		mainWindow->GetCanvas()->Render(image);
+	});
+
+	mainWindow->GetSourceChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
+		int selection = mainWindow->GetSourceChoice()->GetSelection();
+		server->SetUDPStreamingDevice(selection);
+	});
+
+	mainWindow->GetResolutionChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
+		/*int selection = mainWindow->GetResolutionChoice()->GetSelection();
+		
+		if (selection == 0)
+			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(640, 480));
+		else if (selection == 1)
+			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(1280, 720));
+		else if(selection == 2)
+			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(1920, 1080));*/
 	});
 }
 
@@ -49,4 +66,6 @@ void Application::UpdateAvailableDevices() const
 	{
 		mainWindow->GetSourceChoice()->Append(info.name);
 	}
+
+	mainWindow->GetSourceChoice()->SetSelection(server->GetUDPStreamingDevice());
 }

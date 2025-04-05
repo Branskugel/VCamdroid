@@ -3,6 +3,11 @@
 
 #include <thread>
 
+size_t Camera::CalculateFrameSize(int width, int height)
+{
+	return width * height * 3;
+}
+
 Camera::Camera() : image(WIDTH, HEIGHT)
 {
 

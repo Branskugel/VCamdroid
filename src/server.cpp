@@ -12,8 +12,11 @@ Server::Server(int port, const ConnectionListener& connectionListener, const Byt
 	acceptor(tcp::acceptor(context, tcp::endpoint(tcp::v4(), port))),
 	udpsocket(context, udp::endpoint(asio::ip::udp::v4(), port))
 {
-	bytesReceived = 0;
-	buffer = new unsigned char[640 * 480 * 3];
+	streamingDevice = 0;
+	udpBytesReceived = 0;
+	// Default frame size is 640x480
+	udpFrameByteSize = 640 * 480 * 3;
+	buffer = new unsigned char[udpFrameByteSize];
 	
 	StartReceive();
 }
@@ -78,6 +81,47 @@ void Server::Close()
 	logger << "[SERVER] Closed.\n";
 }
 
+void Server::SetUDPFrameByteSize(size_t size)
+{
+	//udpFrameByteSize = size;
+	//buffer = (unsigned char*)std::realloc(buffer, udpFrameByteSize);
+
+	//logger << "[SERVER] Set UDP frame byte size " << size << std::endl;
+}
+
+void Server::SetUDPStreamingDevice(int device)
+{
+	if (device < 0 || device >= connections.size())
+		return;
+
+	connections[device]->Send("streamstart");
+	connections[device]->active = true;
+	
+	udpBytesReceived = 0;
+	logger << "[SERVER] Set UDP stream device: " << connections[device]->socket.remote_endpoint() << std::endl;
+
+	for (int i = 0; i < connections.size(); i++)
+	{
+		if(i != device)
+		{
+			connections[i]->active = false;
+			connections[i]->Send("streamstop");
+		}
+	}
+}
+
+int Server::GetUDPStreamingDevice()
+{
+	for (int i = 0; i < connections.size(); i++)
+	{
+		if (connections[i]->active)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
 std::vector<Server::DeviceInfo> Server::GetConnectedDevicesInfo()
 {
 	std::vector<DeviceInfo> connectionInfo;
@@ -117,8 +161,11 @@ void Server::TCPDoAccept()
 
 void Server::StartReceive()
 {
+	// Read directly into the main buffer in the specified range
+	// Start offset is how many bytes were received from the current
+	// frame and max buffer size is how many bytes are left to be read
 	udpsocket.async_receive_from(
-		asio::buffer(buffer + bytesReceived, 640 * 480 * 3 - bytesReceived),
+		asio::buffer(buffer + udpBytesReceived, udpFrameByteSize - udpBytesReceived),
 		remote_endpoint,
 		std::bind(&Server::HandleReceive, this, std::placeholders::_1, std::placeholders::_2)
 	);
@@ -128,14 +175,21 @@ void Server::HandleReceive(const std::error_code& ec, size_t bytesReceived)
 {
 	if (!ec)
 	{
-		this->bytesReceived += bytesReceived;
+		this->udpBytesReceived += bytesReceived;
 
-		if (this->bytesReceived >= 921600)
+		// If we received all the bytes needed for a frame
+		// notify the listener and reset the receiving buffer
+		if (this->udpBytesReceived >= this->udpFrameByteSize)
 		{
-			bytesReceivedListener.OnBytesReceived(buffer, 921600);
-			this->bytesReceived = 0;
+			bytesReceivedListener.OnBytesReceived(buffer, this->udpFrameByteSize);
+			this->udpBytesReceived = 0;
 		}
 
+		// Mechanism to synchronize the server with the client
+		// otherwise client might send the next segment of the 
+		// frame before the server finished processing the current 
+		// one result in loss of data
+		// The client waits to read some bytes after between sending segments
 		udpsocket.send_to(asio::buffer("done"), remote_endpoint);
 
 		StartReceive();
@@ -157,9 +211,10 @@ void Server::OnConnectionDisconnected(std::shared_ptr<Connection> connection)
 
 Server::Connection::Connection(tcp::socket socket, std::string& name, OnDisconnectedListener onDisconnectedListener)
 	: socket(std::move(socket)),
+	name(name),
 	onDisconnectedListener(onDisconnectedListener)
 {
-	this->name = name;
+	active = false;
 	Read();
 }
 
@@ -180,7 +235,7 @@ void Server::Connection::Read()
 
 void Server::Connection::Send(std::string message)
 {
-	socket.async_send(asio::buffer(message));
+	socket.send(asio::buffer(message));
 }
 
 void Server::Connection::Close()

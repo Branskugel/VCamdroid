@@ -15,6 +15,8 @@ public:
 	static const int WIDTH = 640;
 	static const int HEIGHT = 480;
 
+	static size_t CalculateFrameSize(int width, int height);
+
 	Camera();
 	
 	virtual void OnBytesReceived(const unsigned char* bytes, size_t length) const override;

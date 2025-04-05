@@ -3,6 +3,7 @@
 #include <tuple>
 #include <thread>
 #include <asio.hpp>
+#include <string>
 
 /// <summary>
 /// Server implementation for the custom transmission protocol in use.
@@ -47,6 +48,9 @@ public:
 
 	void Start();
 	void Close();
+	void SetUDPFrameByteSize(size_t size);
+	void SetUDPStreamingDevice(int device);
+	int GetUDPStreamingDevice();
 
 	std::vector<DeviceInfo> GetConnectedDevicesInfo();
 
@@ -64,6 +68,7 @@ private:
 		std::array<char, BUFLEN> buffer;
 		tcp::socket socket;
 		
+		bool active;
 		std::string name;
 
 		Connection(tcp::socket socket, std::string& name, OnDisconnectedListener onDisconnectedListener);
@@ -91,9 +96,11 @@ private:
 
 	std::thread thread;
 
-	size_t bytesReceived;
+	size_t udpFrameByteSize;
+	size_t udpBytesReceived;
 	unsigned char* buffer;
 
+	int streamingDevice;
 	std::vector<std::shared_ptr<Connection>> connections;
 
 	void TCPDoAccept();
