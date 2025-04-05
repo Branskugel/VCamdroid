@@ -5,10 +5,9 @@
 #include <functional>
 #include <vector>
 
-#include "IServerListener.h"
 #include "server.h"
 
-class Camera : public IServerListener
+class Camera : public Server::BytesReceivedListener
 {
 public:
 	using OnFrameReadyCallback = std::function<void(const wxImage& image)>;
@@ -18,9 +17,7 @@ public:
 
 	Camera();
 	
-	virtual void OnClientConnected() override;
-	virtual void OnClientDisconnected() override;
-	virtual void OnBytesReceived(std::vector<unsigned char> bytes) const override;
+	virtual void OnBytesReceived(const unsigned char* bytes, size_t length) const override;
 
 	void PrepareBytes(std::vector<unsigned char>& bytes);
 	void SetOnFrameReady(OnFrameReadyCallback fn);

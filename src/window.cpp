@@ -57,7 +57,7 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	
 	wxFlexGridSizer* settingsSizer = new wxFlexGridSizer(2, 2, 5, 5);
 
-	sourceChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, new wxString[3]{ "Device #1", "Device #2", "Device #3" });
+	sourceChoice = new wxChoice(parent, wxID_ANY);
 	settingsSizer->Add(new wxStaticText(parent, wxID_ANY, "Source"), 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	settingsSizer->Add(sourceChoice);
 

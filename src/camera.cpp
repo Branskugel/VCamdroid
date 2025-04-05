@@ -5,23 +5,14 @@
 
 Camera::Camera() : image(WIDTH, HEIGHT)
 {
-	server = std::make_unique<Server>(*this);
-	server->Start();
+
 }
 
-void Camera::OnClientConnected()
-{
-}
-
-void Camera::OnClientDisconnected()
-{
-}
-
-void Camera::OnBytesReceived(std::vector<unsigned char> bytes) const
+void Camera::OnBytesReceived(const unsigned char* bytes, size_t length) const
 {
 	unsigned char* data = image.GetData();
 
-	for (int i = 0; i < bytes.size(); i++)
+	for (int i = 0; i < length; i++)
 	{
 		data[i] = bytes[i];
 	}

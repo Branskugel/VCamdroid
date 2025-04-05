@@ -11,7 +11,11 @@
 class Logger
 {
 public:
-	Logger(std::ostream& outstream = std::cout): outstream(outstream)
+	static const int CONSOLE = 0;
+	static const int FILE = 1;
+	static const int DISABLED = 2;
+
+	Logger(int mode) : mode(mode), filestream("app.log")
 	{
 	}
 
@@ -19,19 +23,31 @@ public:
 	// https://stackoverflow.com/a/10059337
 	Logger& operator<<(std::ostream& (*f)(std::ostream&))
 	{
-		outstream << std::endl;
+		if (mode != DISABLED)
+		{
+			stream() << std::endl;
+		}
 		return *this;
 	}
 
 	template<typename T>
 	Logger& operator<<(const T& data)
 	{
-		outstream << data;
+		if (mode != DISABLED)
+		{
+			stream() << data;
+		}
 		return *this;
 	}
 
 private:
-	std::ostream& outstream;
+	int mode;
+	std::ofstream filestream;
+
+	std::ostream& stream()
+	{
+		return mode == CONSOLE ? std::cout : filestream;
+	}
 };
 
 extern Logger logger;
