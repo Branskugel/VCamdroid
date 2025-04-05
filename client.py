@@ -4,13 +4,14 @@ import random
 import math
 import cv2
 import sys
+import threading
 
 DGRAM = 2**16 - 64
 
 class Client:
     def __init__(self, name):
         self.name = name
-
+        self.streaming = False
         self.socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -21,12 +22,20 @@ class Client:
         msg = f"{self.name}"
         self.socket_tcp.send(bytes(msg, 'utf8'))
 
+        while True:
+            res = self.socket_tcp.recv(15).decode()
+            print(res)
+            if res == "streamstart":
+                self.streaming = True
+            else:
+                self.streaming = False
+
     def udpsend(self, data):
         size = len(data)
         segments = math.ceil(size / DGRAM)
 
         start = 0
-        while segments:
+        while segments and self.streaming == True:
             end = min(size, start + DGRAM)
             self.socket_udp.sendto(data[start:end], self.addr)
 
@@ -36,28 +45,38 @@ class Client:
             res = self.socket_udp.recvfrom(5)
 
 
+    def run(self):
+        thread1 = threading.Thread(target=self.connect, args=(addr,))
+        thread2 = threading.Thread(target=self.start_stream)
+
+        thread1.start()
+        thread2.start()
+
 class RandomStreamClient(Client):
     def start_stream(self):
+        print("start stream")
         data = bytearray()
         while True:
-            for i in range(0, 640 * 480 * 3):
-                data.append(random.randint(0, 255))
-            
-            self.udpsend(data)
+            if self.streaming == True:
+                for i in range(0, 640 * 480 * 3):
+                    data.append(random.randint(0, 255))
+                
+                self.udpsend(data)
             
 
 class OpencvClient(Client):
     def __init__(self, name):
         Client.__init__(self, name)
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(2)
 
     def start_stream(self):
         while True:
             ret, frame = self.cap.read()
             cv2.imshow("frame", frame)
 
-            data = frame.flatten()
-            self.udpsend(data)
+            if self.streaming == True:
+                data = frame.flatten()
+                self.udpsend(data)
 
             if cv2.waitKey(1) == ord('q'):
                 break
@@ -69,36 +88,4 @@ if sys.argv[1] == 'opencv':
 else:
     client = RandomStreamClient("RandomStreamClient") 
 
-client.connect(addr)
-client.start_stream()
-
-
-# sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# sock.settimeout(1.0)
-# sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 300000)
-
-# addr = ("127.0.0.1", 6969)
-
-# cap = cv2.VideoCapture(0)
-
-# while True:
-#     ret, frame = cap.read()
-#     cv2.imshow("frame", frame)
-
-#     data = frame.flatten()
-
-#     size = len(data)
-#     segments = math.ceil(size / DGRAM)
-
-#     start = 0
-#     while segments:
-#         end = min(size, start + DGRAM)
-#         sock.sendto(data[start:end], addr)
-        
-#         start = end
-#         segments -= 1
-
-#         #res = sock.recvfrom(5)
-
-#     if cv2.waitKey(1) == ord('q'):
-#         break
+client.run()
