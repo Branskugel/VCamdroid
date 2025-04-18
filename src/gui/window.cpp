@@ -31,16 +31,15 @@ void Window::InitializeMenu()
 	menuBar->Append(file, "File");
 
 	wxMenu* connect = new wxMenu();
-	connect->Append(wxID_ANY, "QR Code");
+	connect->Append(MenuIDs::QR, "QR Code");
 	connect->AppendSeparator();
 	connect->Append(wxID_ANY, "IP:\t192.xxx.xxx.1");
 	connect->Append(wxID_ANY, "Port:\t6969");
 	menuBar->Append(connect, "Connect");
 
 	wxMenu* devices = new wxMenu();
-	devices->Append(wxID_ANY, "See connected devices");
+	devices->Append(MenuIDs::DEVICES, "See connected devices");
 	menuBar->Append(devices, "Devices");
-
 
 	SetMenuBar(menuBar);
 }

@@ -16,13 +16,12 @@ public:
 	
 	virtual void OnDeviceConnected() const override;
 	virtual void OnDeviceDisconnected() const override;
-
-	void UpdateAvailableDevices() const;
-
 private:
-
 	Window* mainWindow;
 
 	std::unique_ptr<Server> server;
 	std::unique_ptr<Stream> stream;
+	
+	void UpdateAvailableDevices() const;
+	void OnMenuEvent(wxCommandEvent& event);
 };

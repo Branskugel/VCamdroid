@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include "gui/imgadjdlg.h"
+#include "gui/devicesview.h"
 
 Application::Application()
 {
@@ -15,6 +16,8 @@ Application::Application()
 
 	server = std::make_unique<Server>(6969, *this, *stream);
 	server->Start();
+
+	mainWindow->Bind(wxEVT_MENU, &Application::OnMenuEvent, this);
 
 	mainWindow->GetSourceChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
 		int selection = mainWindow->GetSourceChoice()->GetSelection();
@@ -92,4 +95,20 @@ void Application::UpdateAvailableDevices() const
 	}
 
 	mainWindow->GetSourceChoice()->SetSelection(server->GetUDPStreamingDevice());
+}
+
+void Application::OnMenuEvent(wxCommandEvent& event)
+{
+	switch (event.GetId())
+	{
+		case Window::MenuIDs::DEVICES:
+		{
+			DevicesView devlistview(server->GetConnectedDevicesInfo());
+			devlistview.ShowModal();
+			break;
+		}
+
+		case Window::MenuIDs::QR:
+			break;
+	}
 }

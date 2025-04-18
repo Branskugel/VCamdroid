@@ -7,6 +7,12 @@
 class Window : public wxFrame
 {
 public:
+	static struct MenuIDs
+	{
+		static const int QR = 100;
+		static const int DEVICES = 101;
+	};
+
 	Window();
 
 	Canvas* GetCanvas();
