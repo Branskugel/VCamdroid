@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\softcam\dist\include;$(ProjectDir)include;$(SolutionDir)lib\asio\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\softcam\dist\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,21 +134,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
-    <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\gui\devicesview.cpp" />
+    <ClCompile Include="src\gui\imgadjdlg.cpp" />
+    <ClCompile Include="src\gui\qrconview.cpp" />
+    <ClCompile Include="src\stream.cpp" />
     <ClCompile Include="src\canvas.cpp" />
     <ClCompile Include="src\main.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\server.cpp" />
-    <ClCompile Include="src\window.cpp" />
+    <ClCompile Include="src\gui\window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\application.h" />
-    <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\gui\devicesview.h" />
+    <ClInclude Include="include\gui\imgadjdlg.h" />
+    <ClInclude Include="include\gui\qrconview.h" />
+    <ClInclude Include="include\stream.h" />
     <ClInclude Include="include\canvas.h" />
-    <ClInclude Include="include\IServerListener.h" />
+    <ClInclude Include="include\logger.h" />
     <ClInclude Include="include\server.h" />
-    <ClInclude Include="include\window.h" />
+    <ClInclude Include="include\gui\window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -21,16 +21,25 @@
     <ClCompile Include="src\application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\window.cpp">
+    <ClCompile Include="src\gui\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\camera.cpp">
+    <ClCompile Include="src\stream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\imgadjdlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\devicesview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\qrconview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,19 +47,28 @@
     <ClInclude Include="include\application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\window.h">
+    <ClInclude Include="include\gui\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\canvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IServerListener.h">
+    <ClInclude Include="include\stream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\imgadjdlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\devicesview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\qrconview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
