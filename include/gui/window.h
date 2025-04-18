@@ -3,6 +3,7 @@
 #include <wx/wx.h>
 
 #include "canvas.h"
+#include "server.h"
 
 class Window : public wxFrame
 {
@@ -13,7 +14,7 @@ public:
 		static const int DEVICES = 101;
 	};
 
-	Window();
+	Window(Server::HostInfo hostInfo);
 
 	Canvas* GetCanvas();
 
@@ -38,7 +39,7 @@ private:
 	wxButton* adjustmentsButton;
 	wxButton* photoButton;
 
-	void InitializeMenu();
+	void InitializeMenu(Server::HostInfo hostinfo);
 	void InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer);
 	void InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer);
 };

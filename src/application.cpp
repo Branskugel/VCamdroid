@@ -2,13 +2,14 @@
 
 #include "gui/imgadjdlg.h"
 #include "gui/devicesview.h"
+#include "gui/qrconview.h"
+
+#include <qrcodegen.hpp>
 
 Application::Application()
 {
 	wxInitAllImageHandlers();
 	//wxImageHandler::
-
-	mainWindow = new Window();
 
 	stream = std::make_unique<Stream>([&](const wxImage& image) {
 		mainWindow->GetCanvas()->Render(image);
@@ -16,6 +17,8 @@ Application::Application()
 
 	server = std::make_unique<Server>(6969, *this, *stream);
 	server->Start();
+
+	mainWindow = new Window(server->GetHostInfo());
 
 	mainWindow->Bind(wxEVT_MENU, &Application::OnMenuEvent, this);
 
@@ -109,6 +112,12 @@ void Application::OnMenuEvent(wxCommandEvent& event)
 		}
 
 		case Window::MenuIDs::QR:
+		{
+			auto info = server->GetHostInfo();
+			QrconView qrview(std::get<0>(info), std::get<1>(info), std::get<2>(info), wxSize(150, 150));
+			qrview.ShowModal();
+			
 			break;
+		}
 	}
 }

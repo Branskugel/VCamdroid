@@ -21,7 +21,7 @@ Server::Server(int port, const ConnectionListener& connectionListener, const Byt
 	StartReceive();
 }
 
-std::pair<std::string, std::string> Server::GetHostInfo()
+Server::HostInfo Server::GetHostInfo()
 {
 	std::string name = asio::ip::host_name();
 
@@ -46,7 +46,7 @@ std::pair<std::string, std::string> Server::GetHostInfo()
 
 	inet_ntop(res->ai_family, addr, ipstr, sizeof(ipstr));
 
-	return { name, ipstr };
+	return { name, ipstr, std::to_string(port) };
 }
 
 void Server::Start()

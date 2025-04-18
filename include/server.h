@@ -20,6 +20,7 @@ class Server
 public:
 	using tcp = asio::ip::tcp;
 	using udp = asio::ip::udp;
+	using HostInfo = std::tuple<std::string, std::string, std::string>;
 
 	struct ConnectionListener
 	{
@@ -42,9 +43,9 @@ public:
 	Server(int port, const ConnectionListener& connectionListener, const BytesReceivedListener& bytesReceivedListener);
 
 	/// <summary>
-	/// Gets host device's info (IPv4 address and port)
+	/// Gets host device's info (name, IPv4 address and port)
 	/// </summary>
-	std::pair<std::string, std::string> GetHostInfo();
+	HostInfo GetHostInfo();
 
 	void Start();
 	void Close();

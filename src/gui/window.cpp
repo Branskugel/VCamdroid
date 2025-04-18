@@ -5,20 +5,20 @@
 #include <wx/dc.h>
 #include <wx/artprov.h>
 
-Window::Window()
+Window::Window(Server::HostInfo hostinfo)
 	: wxFrame(nullptr, wxID_ANY, "VCamdroid", wxDefaultPosition, wxSize(500, 450), wxDEFAULT_FRAME_STYLE & ~wxMAXIMIZE_BOX & ~wxRESIZE_BORDER)
 {
 	wxPanel* panel = new wxPanel(this, wxID_ANY);
 	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
-	InitializeMenu();
+	InitializeMenu(hostinfo);
 	InitializeCanvasPanel(panel, topsizer);
 	InitializeControlPanel(panel, topsizer);
 
 	panel->SetSizerAndFit(topsizer);
 }
 
-void Window::InitializeMenu()
+void Window::InitializeMenu(Server::HostInfo hostinfo)
 {
 	wxMenuBar* menuBar = new wxMenuBar();
 
@@ -33,8 +33,8 @@ void Window::InitializeMenu()
 	wxMenu* connect = new wxMenu();
 	connect->Append(MenuIDs::QR, "QR Code");
 	connect->AppendSeparator();
-	connect->Append(wxID_ANY, "IP:\t192.xxx.xxx.1");
-	connect->Append(wxID_ANY, "Port:\t6969");
+	connect->Append(wxID_ANY, "IP:\t" + std::get<1>(hostinfo));
+	connect->Append(wxID_ANY, "Port:\t" + std::get<2>(hostinfo));
 	menuBar->Append(connect, "Connect");
 
 	wxMenu* devices = new wxMenu();
