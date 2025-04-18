@@ -1,4 +1,4 @@
-#include "window.h"
+#include "gui/window.h"
 
 #include <iostream>
 #include <thread>
@@ -56,8 +56,8 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	wxGridSizer* sizer = new wxGridSizer(1, 2, 0, 5);
 	
 	wxFlexGridSizer* settingsSizer = new wxFlexGridSizer(2, 2, 5, 5);
-
-	sourceChoice = new wxChoice(parent, wxID_ANY);
+	                                                                                                        
+	sourceChoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 1, new wxString[1]{ "No devices" });
 	settingsSizer->Add(new wxStaticText(parent, wxID_ANY, "Source"), 0, wxALL | wxALIGN_CENTER_VERTICAL);
 	settingsSizer->Add(sourceChoice);
 
@@ -78,8 +78,8 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	flipButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/flip.png", wxBITMAP_TYPE_PNG));
 	controlsSizer->Add(flipButton, 0, wxRIGHT, 5);
 
-	settingsButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/settings.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(settingsButton, 0, wxRIGHT, 10);
+	adjustmentsButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/settings.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(adjustmentsButton, 0, wxRIGHT, 10);
 
 	photoButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/photo.png", wxBITMAP_TYPE_PNG));
 	controlsSizer->Add(photoButton);
@@ -120,9 +120,9 @@ wxButton* Window::GetFlipButton()
 	return flipButton;
 }
 
-wxButton* Window::GetSettingsButton()
+wxButton* Window::GetAdjustmentsButton()
 {
-	return settingsButton;
+	return adjustmentsButton;
 }
 
 wxButton* Window::GetPhotoButton()

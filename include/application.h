@@ -2,9 +2,9 @@
 
 #include <wx/wx.h>
 
-#include "window.h"
+#include "gui/window.h"
 #include "server.h"
-#include "camera.h"
+#include "stream.h"
 
 class Application : public wxApp, public Server::ConnectionListener
 {
@@ -24,5 +24,5 @@ private:
 	Window* mainWindow;
 
 	std::unique_ptr<Server> server;
-	std::unique_ptr<Camera> camera;
+	std::unique_ptr<Stream> stream;
 };

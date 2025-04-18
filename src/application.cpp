@@ -1,7 +1,6 @@
 #include "application.h"
 
-#include "window.h"
-#include "logger.h"
+#include "gui/imgadjdlg.h"
 
 Application::Application()
 {
@@ -10,13 +9,12 @@ Application::Application()
 
 	mainWindow = new Window();
 
-	camera = std::make_unique<Camera>();
-	server = std::make_unique<Server>(6969, *this, *camera);
-	server->Start();
-
-	camera->SetOnFrameReady([&](const wxImage& image) {
+	stream = std::make_unique<Stream>([&](const wxImage& image) {
 		mainWindow->GetCanvas()->Render(image);
 	});
+
+	server = std::make_unique<Server>(6969, *this, *stream);
+	server->Start();
 
 	mainWindow->GetSourceChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
 		int selection = mainWindow->GetSourceChoice()->GetSelection();
@@ -33,12 +31,38 @@ Application::Application()
 		else if(selection == 2)
 			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(1920, 1080));*/
 	});
+
+	mainWindow->GetRotateLeftButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
+		stream->RotateLeft();
+	});
+
+	mainWindow->GetRotateRightButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
+		stream->RotateRight();
+	});
+
+	mainWindow->GetFlipButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
+		stream->Mirror();
+	});
+
+	mainWindow->GetAdjustmentsButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
+		ImgAdjDlg dialog(nullptr, stream->GetAdjustments());
+		
+		dialog.Bind(EVT_BRIGHTNESS_CHANGED, [&](const wxCommandEvent& event) {
+			stream->SetBrightnessAdjustment(event.GetInt());
+		});
+
+		dialog.Bind(EVT_SATURATION_CHANGED, [&](const wxCommandEvent& event) {
+			stream->SetSaturationAdjustment(event.GetInt());
+		});
+
+		dialog.ShowModal();
+	});
 }
 
 Application::~Application()
 {
 	server->Close();
-	camera->Close();
+	stream->Close();
 }
 
 bool Application::OnInit()

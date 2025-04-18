@@ -17,7 +17,7 @@ public:
 	wxButton* GetRotateLeftButton();
 	wxButton* GetRotateRightButton();
 	wxButton* GetFlipButton();
-	wxButton* GetSettingsButton();
+	wxButton* GetAdjustmentsButton();
 	wxButton* GetPhotoButton();
 
 private:
@@ -29,9 +29,9 @@ private:
 	wxButton* rotateLeftButton;
 	wxButton* rotateRightButton;
 	wxButton* flipButton;
-	wxButton* settingsButton;
+	wxButton* adjustmentsButton;
 	wxButton* photoButton;
-	
+
 	void InitializeMenu();
 	void InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer);
 	void InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer);
