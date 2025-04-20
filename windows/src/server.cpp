@@ -25,28 +25,21 @@ Server::HostInfo Server::GetHostInfo()
 {
 	std::string name = asio::ip::host_name();
 
-	addrinfo* res;
-	addrinfo hints;
+	// Get the active network adapter by 
+	// creating a dummy UDP connection and let the OS 
+	// determine what network adapter will be used
+	udp::resolver resolver(context);
+	udp::socket socket(context);
 
-	std::memset(&hints, 0, sizeof(addrinfo));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
+	socket.connect(udp::endpoint(asio::ip::address::from_string("8.8.8.8"), 80));
 
-	getaddrinfo(name.c_str(), NULL, &hints, &res);
+	// The IPv4 address needed is the address of the local endpoint assigned to the socket
+	// (the network adapter actual traffic is routed trough)
+	asio::ip::address local_addr = socket.local_endpoint().address();
 
-	void* addr;
-	char ipstr[INET_ADDRSTRLEN];
+	socket.close();
 
-	while (res->ai_next != NULL)
-	{
-		res = res->ai_next;
-	}
-
-	addr = &((sockaddr_in*)res->ai_addr)->sin_addr;
-
-	inet_ntop(res->ai_family, addr, ipstr, sizeof(ipstr));
-
-	return { name, ipstr, std::to_string(port) };
+	return { name, local_addr.to_string(), std::to_string(port)};
 }
 
 void Server::Start()
