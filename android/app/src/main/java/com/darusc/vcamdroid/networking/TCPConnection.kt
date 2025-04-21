@@ -21,7 +21,7 @@ class TCPConnection(
 ) {
 
     interface Listener {
-        fun onBytesReceived(bytes: CharArray)
+        fun onBytesReceived(bytes: CharArray, size: Int)
     }
 
     private lateinit var socket: Socket
@@ -71,7 +71,7 @@ class TCPConnection(
         while(running.get()) {
             try {
                 val bytes = bufferedReader?.read(buf)
-                listener.onBytesReceived(buf)
+                listener.onBytesReceived(buf, bytes ?: 0)
             } catch (e: SocketException) {
                 Log.e(TAG, "Error while reading. Closing socket. ${e.message}")
                 break
