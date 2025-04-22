@@ -4,9 +4,10 @@
 
 #include <functional>
 #include <vector>
-#include "server.h"
 
-class Stream : public Server::BytesReceivedListener
+#include "net/receiver.h"
+
+class Stream : public Receiver::FrameReceivedListener
 {
 public:
 	using OnFrameReadyCallback = std::function<void(const wxImage& image)>;
@@ -34,7 +35,7 @@ public:
 
 	Stream(OnFrameReadyCallback fn);
 	
-	virtual void OnBytesReceived(const unsigned char* bytes, size_t length) const override;
+	virtual void OnFrameReceived(const unsigned char* bytes, size_t length) const override;
 	
 	/// Rotates the image stream by 90 degrees counterclockwise
 	void RotateLeft();
@@ -55,6 +56,8 @@ public:
 	void Close();
 
 private:
+	bool closed;
+
 	wxImage image;
 	OnFrameReadyCallback onFrameReady;
 

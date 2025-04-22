@@ -1,5 +1,5 @@
 #include "stream.h"
-#include "server.h"
+
 #include "logger.h"
 
 size_t Stream::CalculateFrameSize(int width, int height)
@@ -9,12 +9,16 @@ size_t Stream::CalculateFrameSize(int width, int height)
 
 Stream::Stream(OnFrameReadyCallback fn) : onFrameReady(fn), image(WIDTH, HEIGHT)
 {
+	closed = false;
 	transforms = { 0, 0 };
 	adjustments = { 0, 0 };
 }
 
-void Stream::OnBytesReceived(const unsigned char* bytes, size_t length) const
+void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const
 {
+	if (closed)
+		return;
+
 	unsigned char* data = image.GetData();
 	std::copy(&bytes[0], &bytes[length - 1], data);
 
@@ -91,4 +95,5 @@ wxImage Stream::ApplyFrameTransformsAndAdjustments() const
 
 void Stream::Close()
 {
+	closed = true;
 }

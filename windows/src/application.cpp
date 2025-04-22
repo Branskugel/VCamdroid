@@ -20,6 +20,7 @@ Application::Application()
 
 	mainWindow = new Window(server->GetHostInfo());
 
+	mainWindow->Bind(wxEVT_CLOSE_WINDOW, &Application::OnWindowCloseEvent, this);
 	mainWindow->Bind(wxEVT_MENU, &Application::OnMenuEvent, this);
 
 	mainWindow->GetSourceChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
@@ -63,12 +64,6 @@ Application::Application()
 
 		dialog.ShowModal();
 	});
-}
-
-Application::~Application()
-{
-	server->Close();
-	stream->Close();
 }
 
 bool Application::OnInit()
@@ -120,4 +115,11 @@ void Application::OnMenuEvent(wxCommandEvent& event)
 			break;
 		}
 	}
+}
+
+void Application::OnWindowCloseEvent(wxCloseEvent& event)
+{
+	stream->Close();
+	server->Close();
+	mainWindow->Destroy();
 }

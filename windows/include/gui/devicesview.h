@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wx/wx.h>
-#include "server.h"
+#include "net/server.h"
 
 class DevicesView : public wxDialog
 {

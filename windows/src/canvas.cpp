@@ -13,8 +13,14 @@ Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size)
 
 void Canvas::Render(const wxImage& image)
 {
-	shouldDraw = true;
+	if (!image.IsOk())
+		return;
+
 	this->bitmap = wxBitmap(image.Scale(size.x, size.y));
+	if (!bitmap.IsOk())
+		return;
+
+	shouldDraw = true;
 	this->Refresh();
 	this->Update();
 }

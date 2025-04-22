@@ -3,14 +3,13 @@
 #include <wx/wx.h>
 
 #include "gui/window.h"
-#include "server.h"
+#include "net/server.h"
 #include "stream.h"
 
 class Application : public wxApp, public Server::ConnectionListener
 {
 public:
 	Application();
-	~Application();
 
 	virtual bool OnInit();
 	
@@ -23,5 +22,7 @@ private:
 	std::unique_ptr<Stream> stream;
 	
 	void UpdateAvailableDevices() const;
+
 	void OnMenuEvent(wxCommandEvent& event);
+	void OnWindowCloseEvent(wxCloseEvent& event);
 };

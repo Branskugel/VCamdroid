@@ -3,7 +3,7 @@
 #include <wx/wx.h>
 
 #include "canvas.h"
-#include "server.h"
+#include "net/server.h"
 
 class Window : public wxFrame
 {
