@@ -1,36 +1,221 @@
 package com.darusc.vcamdroid.networking
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
+import java.net.Socket
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.ceil
+import kotlin.math.min
 
-class ConnectionManager(ipAddress: String, port: Int) : TCPConnection.Listener {
+class ConnectionManager (
+    private val connectionStateCallback: ConnectionStateCallback
+) : Connection.Listener {
 
-    private val tcpConn: TCPConnection
-    private val udpConn: UDPConnection
+    private val TAG = "VCamdroid"
+
+    enum class Mode {
+        USB,
+        WIFI
+    }
+
+    private var tcpConn: TCPConnection? = null
+    private var udpConn: UDPConnection? = null
+
+    /**
+     * Active connection. Prioritize UDP connection if available
+     * otherwise fall back to the TCP Conneciton
+     */
+    private val connection
+        get() = (udpConn ?: tcpConn) as Connection
 
     private var streamingEnabled = false
 
-    init {
-        tcpConn = TCPConnection(ipAddress, port, this)
-        udpConn = UDPConnection(ipAddress, port)
+    interface ConnectionStateCallback {
+        fun onConnectionSuccessful(connectionMode: Mode)
+        fun onConnectionFailed(connectionMode: Mode)
+        fun onDisconnected()
     }
 
-    fun sendVideoStreamFrame() {
-        if(!streamingEnabled) {
+    /**
+     * Wrapper around a socket to manage the TCP connection.
+     * Using it only to send the video stream. No packet receiving implementation.
+     */
+    private inner class UDPConnection (
+        ipAddress: String,
+        private val port: Int,
+    ) : Connection() {
+
+        private val address: InetAddress = InetAddress.getByName(ipAddress)
+
+        override val maxPacketSize = 65472
+
+        private var socket: DatagramSocket
+
+        init {
+            try {
+                socket = DatagramSocket()
+                socket.connect(address, port)
+                socket.sendBufferSize = 921600
+
+                Log.d(TAG, "UDP Connected to $ipAddress:$port")
+            } catch (e: Exception) {
+                throw ConnectionFailedException("$ipAddress:$port")
+            }
+        }
+
+        override fun send(bytes: ByteArray) {
+            socket.send(DatagramPacket(bytes, bytes.size, address, port))
+            socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
+        }
+
+        override fun close() {
+            socket.close()
+        }
+    }
+
+    /**
+     * Wrapper around a socket to manage the TCP connection
+     * @param ipAddress Remote endpoint's IPv4 address
+     * @param port Remote endpoint's port
+     * @param listener The registered listener for callbacks
+     */
+    class TCPConnection (
+        ipAddress: String,
+        port: Int,
+        private val listener: Connection.Listener
+    ) : Connection() {
+
+        override val maxPacketSize = 65472
+
+        private var socket: Socket
+        private var outputStream: OutputStream? = null
+        private var inputStream: InputStream?= null
+
+        private var thread: Thread
+        private val running = AtomicBoolean(true)
+
+        init {
+            try {
+                socket = Socket(ipAddress, port)
+
+                outputStream = socket.getOutputStream()
+                inputStream = socket.getInputStream()
+
+                Log.d(TAG, "TCP Connected to $ipAddress:$port")
+
+                thread = Thread { startReceiveBytesLoop() }
+                thread.start()
+            } catch (e: Exception) {
+                throw ConnectionFailedException("$ipAddress:$port")
+            }
+        }
+
+        override fun send(bytes: ByteArray) {
+            socket.getOutputStream().write(bytes)
+        }
+
+        private fun startReceiveBytesLoop() {
+            val buf = ByteArray(15)
+            while(running.get()) {
+                try {
+                    val bytes = inputStream?.read(buf)
+                    listener.onBytesReceived(buf, bytes ?: 0)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error while reading. Closing socket. ${e.message}")
+                    listener.onDisconnected()
+                    break
+                }
+            }
+        }
+
+        override fun close() {
+            running.set(false)
+            thread.join()
+            socket.close()
+        }
+    }
+
+    /**
+     * Connect in WIFI mode.
+     * Tcp socket is used only for commands, video frames are streamed using Udp
+     */
+    fun connect(ipAddress: String, port: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                tcpConn = TCPConnection(ipAddress, port, this@ConnectionManager)
+                udpConn = UDPConnection(ipAddress, port)
+                tcpConn!!.send("AndroidClient".toByteArray())
+                connectionStateCallback.onConnectionSuccessful(Mode.WIFI)
+            } catch (e: Connection.ConnectionFailedException) {
+                Log.e(TAG, "Connection manager: ${e.message}")
+                connectionStateCallback.onConnectionFailed(Mode.WIFI)
+            }
+        }
+    }
+
+    /**
+     * Connect in USB mode (through adb)
+     * Tcp socket is used both for connection and streaming (adb doesn't allow Udp port forwarding)
+     */
+    fun connect(port: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                tcpConn = TCPConnection("127.0.0.1", port, this@ConnectionManager)
+                tcpConn!!.send("AndroidClient".toByteArray())
+                connectionStateCallback.onConnectionSuccessful(Mode.USB)
+            } catch (e: Connection.ConnectionFailedException) {
+                Log.e(TAG, "Connection manager: ${e.message}")
+                connectionStateCallback.onConnectionFailed(Mode.USB)
+            }
+        }
+    }
+
+    fun sendVideoStreamFrame(frame: ByteArray, withCoroutine: Boolean = false) {
+        if(!streamingEnabled || connection == null) {
             return
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-//            udpConn.send()
+        when(withCoroutine) {
+            false -> sendVideoStreamFrame(frame)
+            true -> CoroutineScope(Dispatchers.IO).launch { sendVideoStreamFrame(frame) }
         }
     }
 
-    override fun onBytesReceived(bytes: CharArray, size: Int) {
-        val message = String(bytes, 0, size)
+    private fun sendVideoStreamFrame(frame: ByteArray) {
+        // Split the frame in n segments of size maxPacketSize
+        // to send over the active connection
+        var segments = ceil(frame.size / connection.maxPacketSize.toDouble()).toInt()
+        var start = 0
+        while(segments != 0) {
+            val end = min(frame.size, start + connection.maxPacketSize)
+            val segment = frame.copyOfRange(start, end)
+
+            connection.send(segment)
+
+            start = end
+            segments--
+        }
+    }
+
+    override fun onBytesReceived(buffer: ByteArray, bytes: Int) {
+        val message = String(buffer, 0, bytes)
         when(message) {
             "streamstart" -> streamingEnabled = true
             "streamstop" -> streamingEnabled = false
         }
+    }
+
+    override fun onDisconnected() {
+        streamingEnabled = false
+        tcpConn?.close()
+        udpConn?.close()
+        connectionStateCallback.onDisconnected()
     }
 }
