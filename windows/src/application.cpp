@@ -3,6 +3,7 @@
 #include "gui/imgadjdlg.h"
 #include "gui/devicesview.h"
 #include "gui/qrconview.h"
+#include "adb.h"
 
 #include <qrcodegen.hpp>
 
@@ -17,6 +18,7 @@ Application::Application()
 
 	server = std::make_unique<Server>(6969, *this, *stream);
 	server->Start();
+	adb::start(6969);
 
 	mainWindow = new Window(server->GetHostInfo());
 
@@ -121,5 +123,6 @@ void Application::OnWindowCloseEvent(wxCloseEvent& event)
 {
 	stream->Close();
 	server->Close();
+	adb::kill(6969);
 	mainWindow->Destroy();
 }
