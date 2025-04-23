@@ -2,44 +2,49 @@
 
 #include "logger.h"
 
-Receiver::Receiver(size_t frameByteSize, const FrameReceivedListener& frameReceivedListener) 
-	: frameByteSize(frameByteSize), 
+Receiver::Receiver(size_t maxFrameByteSize, size_t maxPacketSize, const FrameReceivedListener& frameReceivedListener) 
+	: maxFrameByteSize(maxFrameByteSize),
+	maxPacketSize(maxPacketSize),
 	frameReceivedListener(frameReceivedListener)
 {
-	bytesReceived = 0;
-	buffer = new unsigned char[frameByteSize];
+	readBuffer = new unsigned char[maxPacketSize];
+	frameBuffer = new unsigned char[maxFrameByteSize];
+	segmentsReceived = 0;
+	totalSegments = 0;
+	frameSize = 0;
 }
 
 asio::mutable_buffers_1 Receiver::GetBuffer() const
 {
-	// Read directly into the main buffer in the specified range
-	// Start offset is how many bytes were received from the current
-	// frame and max buffer size is how many bytes are left to be read
-	return asio::buffer(buffer + bytesReceived, frameByteSize - bytesReceived);
+	return asio::buffer(readBuffer, maxPacketSize);
 }
 
-void Receiver::ResetBuffer() const
+void Receiver::Reset() const
 {
-	this->bytesReceived = 0;
-}
-
-void Receiver::SetFrameByteSize(size_t size) const
-{
-	frameByteSize = size;
-	buffer = (unsigned char*)std::realloc(buffer, frameByteSize);
-
-	logger << "[SERVER] Set UDP frame byte size " << size << std::endl;
+	this->totalSegments = 0;
+	this->segmentsReceived = 0;
+	this->frameSize = 0;
 }
 
 void Receiver::ReadSome(size_t bytes) const
 {
-	this->bytesReceived += bytes;
+	// Second byte in the buffer is the current segment number
+	segmentsReceived = readBuffer[1];
+	if (segmentsReceived == 1)
+	{
+		// If this segment is the first it means a new frame is incoming 
+		// so remember the total number of segments of this frame 
+		totalSegments = readBuffer[2];
+	}
+	
+	std::copy_n(readBuffer + 3, bytes - 3, frameBuffer + frameSize);
+	frameSize += (bytes - 3);
 
 	// If we received all the bytes needed for a frame
 	// notify the listener and reset the receiving buffer
-	if (this->bytesReceived >= this->frameByteSize)
+	if (segmentsReceived == totalSegments)
 	{
-		frameReceivedListener.OnFrameReceived(buffer, this->frameByteSize);
-		this->bytesReceived = 0;
+		frameReceivedListener.OnFrameReceived(frameBuffer, frameSize);
+		Reset();
 	}
 }

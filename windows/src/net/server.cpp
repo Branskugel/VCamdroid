@@ -3,7 +3,7 @@
 #include "logger.h"
 
 Server::Server(int port, const ConnectionListener& connectionListener, const Receiver::FrameReceivedListener& frameReceivedListener)
-	: Receiver(640 * 480 * 3, frameReceivedListener),
+	: Receiver(640 * 480 * 3, 65472, frameReceivedListener),
 	port(port),
 	connectionListener(connectionListener),
 	acceptor(tcp::acceptor(context, tcp::endpoint(tcp::v4(), port))),
@@ -81,7 +81,7 @@ void Server::SetUDPStreamingDevice(int device)
 	connections[device]->Send("streamstart");
 	connections[device]->active = true;
 	
-	ResetBuffer();
+	Reset();
 	logger << "[SERVER] Set UDP stream device: " << connections[device]->socket.remote_endpoint() << std::endl;
 
 	for (int i = 0; i < connections.size(); i++)

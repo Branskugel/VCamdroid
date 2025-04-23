@@ -58,7 +58,7 @@ public:
 private:
 	bool closed;
 
-	wxImage image;
+	mutable wxImage image;
 	OnFrameReadyCallback onFrameReady;
 
 	Transforms transforms;

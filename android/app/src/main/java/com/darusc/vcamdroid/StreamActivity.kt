@@ -25,7 +25,7 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
 
         camera = Camera(
             viewBinding.viewFinder.surfaceProvider,
-            ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888,
+            ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888,
             ::processImage,
             this,
             this
@@ -39,7 +39,8 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
 
     private fun processImage(image: ImageProxy) {
         if (image.width == 640 && image.height == 480) {
-            val bytes = image.toRgbBytes()
+            //val bytes = image.toRgbBytes()
+            val bytes = image.toJpeg(80)
             image.close()
 
             bytes?.let {

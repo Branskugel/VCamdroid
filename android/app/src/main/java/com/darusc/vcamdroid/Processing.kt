@@ -1,6 +1,7 @@
 package com.darusc.vcamdroid
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.camera.core.ImageProxy
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -35,4 +36,11 @@ fun ImageProxy.toRgbBytes(): ByteArray? {
         println(e.message)
     }
     return null
+}
+
+fun ImageProxy.toJpeg(quality: Int): ByteArray {
+    val stream = ByteArrayOutputStream()
+    val bitmap = toBitmap()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
+    return stream.toByteArray()
 }

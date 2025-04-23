@@ -1,6 +1,7 @@
 package com.darusc.vcamdroid.networking
 
 import android.util.Log
+import androidx.camera.core.processing.Packet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +42,14 @@ class ConnectionManager private constructor() : Connection.Listener {
     enum class Mode {
         USB,
         WIFI
+    }
+
+    class PacketType {
+        companion object {
+            const val FRAME: Byte = 0x00
+            const val RESOLUTION: Byte = 0x01
+            const val ACTIVATION: Byte = 0x02
+        }
     }
 
     private var connectionStateCallback: ConnectionStateCallback? = null
@@ -95,6 +104,11 @@ class ConnectionManager private constructor() : Connection.Listener {
             socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
         }
 
+        override fun send(bytes: ByteArray, size: Int) {
+            socket.send(DatagramPacket(bytes, size, address, port))
+            socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
+        }
+
         override fun close() {
             socket.close()
         }
@@ -139,6 +153,10 @@ class ConnectionManager private constructor() : Connection.Listener {
 
         override fun send(bytes: ByteArray) {
             socket.getOutputStream().write(bytes)
+        }
+
+        override fun send(bytes: ByteArray, size: Int) {
+            socket.getOutputStream().write(bytes, 0, size)
         }
 
         private fun startReceiveBytesLoop() {
@@ -215,16 +233,27 @@ class ConnectionManager private constructor() : Connection.Listener {
     private fun sendVideoStreamFrame(frame: ByteArray) {
         // Split the frame in n segments of size maxPacketSize
         // to send over the active connection
-        var segments = ceil(frame.size / connection.maxPacketSize.toDouble()).toInt()
+        var segments = ceil(frame.size / (connection.maxPacketSize.toDouble() - 1)).toInt()
+
+        // Packet to send of size maxPacketSize
+        // First byte is the packet type
+        // Second byte is the current frame segment number
+        // Third byte is the total number of segments
+        val packet = ByteArray(connection.maxPacketSize)
+        packet[0] = PacketType.FRAME
+        packet[2] = segments.toByte()
+
         var start = 0
-        while (segments != 0) {
+        for (i in 1..segments) {
+            packet[1] = i.toByte()
+
+            // Copy the segment section into the packet from frame bytes
             val end = min(frame.size, start + connection.maxPacketSize)
-            val segment = frame.copyOfRange(start, end)
+            val size = end - start
+            System.arraycopy(frame, start, packet, 3, size)
 
-            connection.send(segment)
-
+            connection.send(packet, size + 1)
             start = end
-            segments--
         }
     }
 
