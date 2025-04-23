@@ -19,9 +19,13 @@
         android:theme="@style/Theme.Vcamdroid"
         tools:targetApi="31">
         <activity
+            android:name=".StreamActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+        <activity
             android:name=".MainActivity"
-            android:screenOrientation="landscape"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

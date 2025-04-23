@@ -1,33 +1,31 @@
 package com.darusc.vcamdroid
 
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.util.Size
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import com.darusc.vcamdroid.databinding.ActivityMainBinding
 import com.darusc.vcamdroid.networking.ConnectionManager
-import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
 
     private lateinit var viewBinding: ActivityMainBinding
 
-    private lateinit var cameraExecutor: ExecutorService
-    private val connectionManager = ConnectionManager(this)
+    private val qrscanner = QRScanner()
+    private val connectionManager = ConnectionManager.getInstance(this)
+    private lateinit var camera: Camera
+
+    private var isConnecting = false
 
     private val TAG = "VCamdroid"
 
@@ -36,37 +34,60 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
-        // Prioritize the usb connection through adb
-        if(hasUsbConnection()) {
-            connectionManager.connect(6969)
-        } else if(hasWifiConnection()) {
-            connectionManager.connect("192.168.100.34", 6969)
-        }
+        camera = Camera(
+            viewBinding.viewFinder.surfaceProvider,
+            ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888,
+            ::processImage,
+            this,
+            this
+        )
+        camera.start()
 
-        //startCamera()
-        cameraExecutor = Executors.newSingleThreadExecutor()
+        // Prioritize the usb connection through adb
+        if (hasUsbConnection()) {
+            connectUSB()
+        } else if (hasWifiConnection()) {
+            connectWIFI()
+        }
     }
 
     override fun onConnectionSuccessful(connectionMode: ConnectionManager.Mode) {
+        qrscanner.stop()
         Log.d(TAG, "Connection successful $connectionMode")
-        startCamera()
+
+        val intent = Intent(this, StreamActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onConnectionFailed(connectionMode: ConnectionManager.Mode) {
-        if(connectionMode == ConnectionManager.Mode.USB && hasWifiConnection()) {
+        if (connectionMode == ConnectionManager.Mode.USB && hasWifiConnection()) {
             // If usb connection failed try again over wifi
-            connectionManager.connect("192.168.100.34", 6969)
+            connectWIFI()
         } else {
+            isConnecting = false
+            qrscanner.stop()
             Log.e(TAG, "Error: Cannot connect!")
         }
     }
 
-    override fun onDisconnected() {
-        Log.d(TAG, "Connection disconnected")
+    private fun processImage(imageProxy: ImageProxy) {
+        // Process each incoming image from the camera
+        // launchScanTask() will scan and call the callback on success
+        // only if start() was called before
+        qrscanner.launchScanTask(imageProxy) { result ->
+            if(result != null) {
+                connectionManager.connect(result.address, result.port)
+            } else {
+                Log.d(TAG, "Invalid QR code")
+            }
+        }
     }
 
     private fun hasUsbConnection(): Boolean {
-        val intent = applicationContext.registerReceiver(null, IntentFilter("android.hardware.usb.action.USB_STATE"))
+        val intent = applicationContext.registerReceiver(
+            null,
+            IntentFilter("android.hardware.usb.action.USB_STATE")
+        )
         return intent?.getBooleanExtra("connected", false) == true
     }
 
@@ -77,69 +98,13 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
 
-    private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+    private fun connectUSB() {
+        connectionManager.connect(6969)
+    }
 
-        cameraProviderFuture.addListener({
-            val resolutionSelector = ResolutionSelector.Builder()
-                .setResolutionStrategy(ResolutionStrategy(Size(640, 480), ResolutionStrategy.FALLBACK_RULE_NONE))
-                .build()
-
-            val cameraProvider = cameraProviderFuture.get()
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            val preview = Preview.Builder()
-                .setResolutionSelector(resolutionSelector)
-                .build()
-                .apply {
-                    surfaceProvider = viewBinding.viewFinder.surfaceProvider
-                }
-
-            val imageAnalyzer = ImageAnalysis.Builder()
-                .setResolutionSelector(resolutionSelector)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-                .apply {
-                    setAnalyzer(cameraExecutor, object : ImageAnalysis.Analyzer {
-                        private val byteArrayRGB = ByteArray(640 * 480 * 3)
-
-                        override fun analyze(image: ImageProxy) {
-                            if(image.width == 640 && image.height == 480) {
-                                try {
-                                    val bitmap = image.toBitmap()
-
-                                    val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
-                                    val byteArray = ByteArray(bitmap.byteCount)
-
-                                    bitmap.copyPixelsToBuffer(byteBuffer)
-                                    byteBuffer.rewind()
-                                    byteBuffer.get(byteArray)
-
-                                    var j = 0
-                                    for (i in byteArrayRGB.indices step 3) {
-                                        byteArrayRGB[i] = byteArray[j]
-                                        byteArrayRGB[i + 1] = byteArray[j + 1]
-                                        byteArrayRGB[i + 2] = byteArray[j + 2]
-                                        j += 4
-                                    }
-
-                                    connectionManager.sendVideoStreamFrame(byteArrayRGB)
-                                } catch (e: Exception) {
-                                    println(e.message)
-                                }
-                            }
-                            image.close()
-                        }
-                    })
-                }
-
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
-            } catch (e: Exception) {
-                Log.e("VCamdroid", "Use case binding failed", e)
-            }
-
-        }, ContextCompat.getMainExecutor(this));
+    private fun connectWIFI() {
+        // Start the QRScanner so it can scan the image frames received from the camera
+        // Actual WIFI connection is tried only on scan success
+        qrscanner.start()
     }
 }

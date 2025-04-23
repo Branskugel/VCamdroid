@@ -14,16 +14,36 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
 import kotlin.math.min
 
-class ConnectionManager (
-    private val connectionStateCallback: ConnectionStateCallback
-) : Connection.Listener {
+class ConnectionManager private constructor() : Connection.Listener {
 
     private val TAG = "VCamdroid"
+
+    companion object {
+        @Volatile private var instance: ConnectionManager? = null
+
+        fun getInstance(): ConnectionManager {
+            synchronized(this) {
+                return instance ?: ConnectionManager().also { instance = it }
+            }
+        }
+
+        fun getInstance(connectionStateCallback: ConnectionStateCallback): ConnectionManager {
+            synchronized(this) {
+                if(instance == null) {
+                    instance = ConnectionManager()
+                }
+                instance!!.setConnectionStateCallback(connectionStateCallback)
+                return instance!!
+            }
+        }
+    }
 
     enum class Mode {
         USB,
         WIFI
     }
+
+    private var connectionStateCallback: ConnectionStateCallback? = null
 
     private var tcpConn: TCPConnection? = null
     private var udpConn: UDPConnection? = null
@@ -38,16 +58,16 @@ class ConnectionManager (
     private var streamingEnabled = false
 
     interface ConnectionStateCallback {
-        fun onConnectionSuccessful(connectionMode: Mode)
-        fun onConnectionFailed(connectionMode: Mode)
-        fun onDisconnected()
+        fun onConnectionSuccessful(connectionMode: Mode) { }
+        fun onConnectionFailed(connectionMode: Mode) { }
+        fun onDisconnected() { }
     }
 
     /**
      * Wrapper around a socket to manage the TCP connection.
      * Using it only to send the video stream. No packet receiving implementation.
      */
-    private inner class UDPConnection (
+    private inner class UDPConnection(
         ipAddress: String,
         private val port: Int,
     ) : Connection() {
@@ -86,7 +106,7 @@ class ConnectionManager (
      * @param port Remote endpoint's port
      * @param listener The registered listener for callbacks
      */
-    class TCPConnection (
+    class TCPConnection(
         ipAddress: String,
         port: Int,
         private val listener: Connection.Listener
@@ -96,7 +116,7 @@ class ConnectionManager (
 
         private var socket: Socket
         private var outputStream: OutputStream? = null
-        private var inputStream: InputStream?= null
+        private var inputStream: InputStream? = null
 
         private var thread: Thread
         private val running = AtomicBoolean(true)
@@ -123,7 +143,7 @@ class ConnectionManager (
 
         private fun startReceiveBytesLoop() {
             val buf = ByteArray(15)
-            while(running.get()) {
+            while (running.get()) {
                 try {
                     val bytes = inputStream?.read(buf)
                     listener.onBytesReceived(buf, bytes ?: 0)
@@ -142,6 +162,10 @@ class ConnectionManager (
         }
     }
 
+    fun setConnectionStateCallback(connectionStateCallback: ConnectionStateCallback) {
+        this.connectionStateCallback = connectionStateCallback
+    }
+
     /**
      * Connect in WIFI mode.
      * Tcp socket is used only for commands, video frames are streamed using Udp
@@ -152,10 +176,10 @@ class ConnectionManager (
                 tcpConn = TCPConnection(ipAddress, port, this@ConnectionManager)
                 udpConn = UDPConnection(ipAddress, port)
                 tcpConn!!.send("AndroidClient".toByteArray())
-                connectionStateCallback.onConnectionSuccessful(Mode.WIFI)
+                connectionStateCallback?.onConnectionSuccessful(Mode.WIFI)
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
-                connectionStateCallback.onConnectionFailed(Mode.WIFI)
+                connectionStateCallback?.onConnectionFailed(Mode.WIFI)
             }
         }
     }
@@ -169,20 +193,20 @@ class ConnectionManager (
             try {
                 tcpConn = TCPConnection("127.0.0.1", port, this@ConnectionManager)
                 tcpConn!!.send("AndroidClient".toByteArray())
-                connectionStateCallback.onConnectionSuccessful(Mode.USB)
+                connectionStateCallback?.onConnectionSuccessful(Mode.USB)
             } catch (e: Connection.ConnectionFailedException) {
                 Log.e(TAG, "Connection manager: ${e.message}")
-                connectionStateCallback.onConnectionFailed(Mode.USB)
+                connectionStateCallback?.onConnectionFailed(Mode.USB)
             }
         }
     }
 
     fun sendVideoStreamFrame(frame: ByteArray, withCoroutine: Boolean = false) {
-        if(!streamingEnabled || connection == null) {
+        if (!streamingEnabled || connection == null) {
             return
         }
 
-        when(withCoroutine) {
+        when (withCoroutine) {
             false -> sendVideoStreamFrame(frame)
             true -> CoroutineScope(Dispatchers.IO).launch { sendVideoStreamFrame(frame) }
         }
@@ -193,7 +217,7 @@ class ConnectionManager (
         // to send over the active connection
         var segments = ceil(frame.size / connection.maxPacketSize.toDouble()).toInt()
         var start = 0
-        while(segments != 0) {
+        while (segments != 0) {
             val end = min(frame.size, start + connection.maxPacketSize)
             val segment = frame.copyOfRange(start, end)
 
@@ -206,7 +230,7 @@ class ConnectionManager (
 
     override fun onBytesReceived(buffer: ByteArray, bytes: Int) {
         val message = String(buffer, 0, bytes)
-        when(message) {
+        when (message) {
             "streamstart" -> streamingEnabled = true
             "streamstop" -> streamingEnabled = false
         }
@@ -216,6 +240,6 @@ class ConnectionManager (
         streamingEnabled = false
         tcpConn?.close()
         udpConn?.close()
-        connectionStateCallback.onDisconnected()
+        connectionStateCallback?.onDisconnected()
     }
 }
