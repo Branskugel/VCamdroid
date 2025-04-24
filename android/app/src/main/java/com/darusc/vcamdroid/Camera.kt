@@ -50,6 +50,7 @@ class Camera(
         ImageAnalysis.Builder()
             .setResolutionSelector(resolutionSelector)
             .setOutputImageFormat(format)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
             .apply {
                 setAnalyzer(cameraExecutor, analyzer)

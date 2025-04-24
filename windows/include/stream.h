@@ -12,11 +12,6 @@ class Stream : public Receiver::FrameReceivedListener
 public:
 	using OnFrameReadyCallback = std::function<void(const wxImage& image)>;
 
-	static const int WIDTH = 640;
-	static const int HEIGHT = 480;
-
-	static size_t CalculateFrameSize(int width, int height);
-
 	struct Transforms
 	{
 		static const int ROTATE_90 = 1;

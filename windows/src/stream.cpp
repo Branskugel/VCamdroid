@@ -3,11 +3,6 @@
 #include <wx/mstream.h>
 #include "logger.h"
 
-size_t Stream::CalculateFrameSize(int width, int height)
-{
-	return width * height * 3;
-}
-
 Stream::Stream(OnFrameReadyCallback fn) : onFrameReady(fn)
 {
 	closed = false;
@@ -23,6 +18,9 @@ void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const
 	// Load the image directly from memory
 	// https://docs.wxwidgets.org/trunk/classwx_memory_input_stream.html
 	wxMemoryInputStream stream(bytes, length);
+
+	// Disable error message box
+	wxLogNull noLog;
 	image.LoadFile(stream, wxBITMAP_TYPE_JPEG);
 
 	if (onFrameReady)

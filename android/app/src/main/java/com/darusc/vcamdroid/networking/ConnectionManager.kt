@@ -12,6 +12,8 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.experimental.and
+import kotlin.experimental.or
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -53,6 +55,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     }
 
     private var connectionStateCallback: ConnectionStateCallback? = null
+    private var onBytesReceivedCallback: ((buffer: ByteArray, bytes: Int) -> Unit)? = null
 
     private var tcpConn: TCPConnection? = null
     private var udpConn: UDPConnection? = null
@@ -180,8 +183,16 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
     }
 
-    fun setConnectionStateCallback(connectionStateCallback: ConnectionStateCallback) {
+    private fun setConnectionStateCallback(connectionStateCallback: ConnectionStateCallback) {
         this.connectionStateCallback = connectionStateCallback
+    }
+
+    /**
+     * The bytesReceivedListener is called only for packets of type different than PacketType.ACTIVATION.
+     * These packets are handled internally
+     */
+    fun setOnBytesReceivedCallback(onBytesReceivedCallback: (buffer: ByteArray, bytes: Int) -> Unit) {
+        this.onBytesReceivedCallback = onBytesReceivedCallback
     }
 
     /**
@@ -233,7 +244,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     private fun sendVideoStreamFrame(frame: ByteArray) {
         // Split the frame in n segments of size maxPacketSize
         // to send over the active connection
-        var segments = ceil(frame.size / (connection.maxPacketSize.toDouble() - 1)).toInt()
+        var segments = ceil(frame.size / (connection.maxPacketSize.toDouble() - 3)).toInt()
 
         // Packet to send of size maxPacketSize
         // First byte is the packet type
@@ -248,20 +259,20 @@ class ConnectionManager private constructor() : Connection.Listener {
             packet[1] = i.toByte()
 
             // Copy the segment section into the packet from frame bytes
-            val end = min(frame.size, start + connection.maxPacketSize)
+            val end = min(frame.size, start + connection.maxPacketSize - 3)
             val size = end - start
             System.arraycopy(frame, start, packet, 3, size)
 
-            connection.send(packet, size + 1)
+            connection.send(packet, size + 3)
             start = end
         }
     }
 
     override fun onBytesReceived(buffer: ByteArray, bytes: Int) {
-        val message = String(buffer, 0, bytes)
-        when (message) {
-            "streamstart" -> streamingEnabled = true
-            "streamstop" -> streamingEnabled = false
+        val packetType = buffer[0]
+        when(packetType) {
+            PacketType.ACTIVATION -> streamingEnabled = buffer[1] == (0x01.toByte())
+            else -> onBytesReceivedCallback?.let { it(buffer, bytes) }
         }
     }
 

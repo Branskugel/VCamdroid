@@ -73,12 +73,31 @@ void Server::Close()
 	logger << "[SERVER] Closed.\n";
 }
 
-void Server::SetUDPStreamingDevice(int device)
+void Server::SetStreamResolution(unsigned short width, unsigned short height)
+{
+	unsigned char bytes[5] = {
+		PacketType::RESOLUTION,							// First byte is the packet type
+		static_cast<unsigned char>(width & 0xFF),		// Low byte of width
+		static_cast<unsigned char>(width >> 8),			// High byte of width
+		static_cast<unsigned char>(height & 0xFF),		// Low byte of height
+		static_cast<unsigned char>(height >> 8),		// High byte of height
+	};
+
+	for (auto& conn : connections)
+	{
+		conn->Send(bytes, 5);
+	}
+}
+
+void Server::SetStreamingDevice(int device)
 {
 	if (device < 0 || device >= connections.size())
 		return;
 
-	connections[device]->Send("streamstart");
+	unsigned char startBytes[2] = { PacketType::ACTIVATION, 0x01 };
+	unsigned char stopBytes[2] = { PacketType::ACTIVATION, 0x00 };
+
+	connections[device]->Send(startBytes, 2);
 	connections[device]->active = true;
 	
 	Reset();
@@ -89,12 +108,12 @@ void Server::SetUDPStreamingDevice(int device)
 		if(i != device)
 		{
 			connections[i]->active = false;
-			connections[i]->Send("streamstop");
+			connections[i]->Send(stopBytes, 2);
 		}
 	}
 }
 
-int Server::GetUDPStreamingDevice()
+int Server::GetStreamingDevice()
 {
 	for (int i = 0; i < connections.size(); i++)
 	{

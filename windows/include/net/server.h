@@ -25,6 +25,13 @@ public:
 	using udp = asio::ip::udp;
 	using HostInfo = std::tuple<std::string, std::string, std::string>;
 
+	struct PacketType
+	{
+		static const int FRAME = 0x00;
+		static const int RESOLUTION = 0x01;
+		static const int ACTIVATION = 0x02;
+	};
+
 	struct ConnectionListener
 	{
 		virtual void OnDeviceConnected() const = 0;
@@ -47,8 +54,9 @@ public:
 
 	void Start();
 	void Close();
-	void SetUDPStreamingDevice(int device);
-	int GetUDPStreamingDevice();
+	void SetStreamResolution(unsigned short width, unsigned short height);
+	void SetStreamingDevice(int device);
+	int GetStreamingDevice();
 
 	std::vector<DeviceInfo> GetConnectedDevicesInfo();
 

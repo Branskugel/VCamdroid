@@ -40,11 +40,16 @@ void Connection::Send(std::string message)
 	socket.send(asio::buffer(message));
 }
 
+void Connection::Send(unsigned char* bytes, size_t size)
+{
+	socket.send(asio::buffer(bytes, size));
+}
+
 void Connection::Close(bool stoppedByServer)
 {
 	if (stoppedByServer)
 	{
-		socket.cancel();
+		//socket.cancel();
 		socket.close();
 	}
 	else

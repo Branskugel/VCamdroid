@@ -18,7 +18,7 @@ Application::Application()
 
 	server = std::make_unique<Server>(6969, *this, *stream);
 	server->Start();
-	//adb::start(6969);
+	adb::start(6969);
 
 	mainWindow = new Window(server->GetHostInfo());
 
@@ -27,18 +27,18 @@ Application::Application()
 
 	mainWindow->GetSourceChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
 		int selection = mainWindow->GetSourceChoice()->GetSelection();
-		server->SetUDPStreamingDevice(selection);
+		server->SetStreamingDevice(selection);
 	});
 
 	mainWindow->GetResolutionChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
-		/*int selection = mainWindow->GetResolutionChoice()->GetSelection();
+		int selection = mainWindow->GetResolutionChoice()->GetSelection();
 		
 		if (selection == 0)
-			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(640, 480));
+			server->SetStreamResolution(640, 480);
 		else if (selection == 1)
-			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(1280, 720));
+			server->SetStreamResolution(1280, 720);
 		else if(selection == 2)
-			server->SetUDPFrameByteSize(Camera::CalculateFrameSize(1920, 1080));*/
+			server->SetStreamResolution(1920, 1080);
 	});
 
 	mainWindow->GetRotateLeftButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
@@ -94,7 +94,7 @@ void Application::UpdateAvailableDevices() const
 		mainWindow->GetSourceChoice()->Append(info.name);
 	}
 
-	mainWindow->GetSourceChoice()->SetSelection(server->GetUDPStreamingDevice());
+	mainWindow->GetSourceChoice()->SetSelection(server->GetStreamingDevice());
 }
 
 void Application::OnMenuEvent(wxCommandEvent& event)
@@ -123,6 +123,6 @@ void Application::OnWindowCloseEvent(wxCloseEvent& event)
 {
 	stream->Close();
 	server->Close();
-	//adb::kill(6969);
+	adb::kill(6969);
 	mainWindow->Destroy();
 }
