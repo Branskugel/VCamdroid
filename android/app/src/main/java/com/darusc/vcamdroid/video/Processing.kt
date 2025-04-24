@@ -1,7 +1,6 @@
-package com.darusc.vcamdroid
+package com.darusc.vcamdroid.video
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.camera.core.ImageProxy
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer

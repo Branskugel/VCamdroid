@@ -1,6 +1,7 @@
-package com.darusc.vcamdroid
+package com.darusc.vcamdroid.video
 
 import android.content.Context
+import android.graphics.Rect
 import android.util.Log
 import android.util.Size
 import androidx.camera.core.CameraSelector
@@ -12,6 +13,7 @@ import androidx.camera.core.Preview.SurfaceProvider
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.util.concurrent.ExecutorService
@@ -31,7 +33,9 @@ class Camera(
 ) {
 
     private val TAG = "VCamdroid"
+
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private lateinit var resolution: Size
 
     private fun buildResolutionSelector(resolution: Size) =
         ResolutionSelector.Builder()
@@ -64,6 +68,7 @@ class Camera(
     }
 
     fun start(resolution: Size, cameraSelector: CameraSelector) {
+        this.resolution = resolution
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
@@ -85,5 +90,43 @@ class Camera(
             }
 
         }, ContextCompat.getMainExecutor(context));
+    }
+
+    /**
+     * Transforms a rectangle from screen coordinates to image coordinates
+     *
+     * https://github.com/googlesamples/mlkit/issues/388
+     *
+     * https://medium.com/@saiful103a/scan-barcode-only-when-they-are-inside-a-specific-area-of-the-preview-android-fcf8e02404d7
+     */
+    fun screenRectToImageRect(
+        screenRect: Rect,
+        screenSize: Size,
+    ): Rect {
+        val imageAspectRatio = resolution.height.toFloat() / resolution.width
+        val screenAspectRatio = screenSize.width.toFloat() / screenSize.height
+
+        var scaleX = 1f
+        var scaleY = 1f
+        var dx = 0f
+        var dy = 0f
+
+        if (imageAspectRatio > screenAspectRatio) {
+            scaleY = screenSize.height.toFloat() / resolution.width
+            scaleX = scaleY
+            dx = (screenSize.width - resolution.height * scaleX) / 2
+        } else {
+            scaleX = screenSize.width.toFloat() / resolution.height
+            scaleY = scaleX
+            dy = (screenSize.height - resolution.width * scaleY) / 2
+        }
+
+        // Transform the screen space coordinates rectangle to image space coordinates
+        val left = ((screenRect.left - dx) / scaleX).toInt()
+        val top = ((screenRect.top - dy) / scaleY).toInt()
+        val right = ((screenRect.right - dx) / scaleX).toInt()
+        val bottom = ((screenRect.bottom - dy) / scaleY).toInt()
+
+        return Rect(left, top, right, bottom)
     }
 }

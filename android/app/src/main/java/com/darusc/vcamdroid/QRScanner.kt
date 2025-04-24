@@ -1,5 +1,6 @@
 package com.darusc.vcamdroid
 
+import android.graphics.Rect
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScanner
@@ -35,8 +36,9 @@ class QRScanner() {
         enabled = false
     }
 
-    fun launchScanTask(imageProxy: ImageProxy, callback: (QRScanner.Result?) -> Unit) {
+    fun launchScanTask(imageProxy: ImageProxy, rect: Rect, callback: (QRScanner.Result?) -> Unit) {
         if(!enabled) {
+            imageProxy.close()
             return
         }
 
@@ -46,6 +48,13 @@ class QRScanner() {
             val result = scanner.process(image)
                 .addOnSuccessListener { barcodes ->
                     for (barcode in barcodes) {
+                        // Only capture QR codes that are inside the given rectangle area
+                        barcode.boundingBox?.let {
+                            if(!rect.contains(it)) {
+                                imageProxy.close()
+                                return@addOnSuccessListener
+                            }
+                        }
                         // Stop the scanner. Further attempts at connecting should be
                         // manually triggered otherwise multiple connection might be established
                         // (for each frame of the camera)

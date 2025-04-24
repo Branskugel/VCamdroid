@@ -3,19 +3,23 @@ package com.darusc.vcamdroid
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
+import android.view.View
+import android.view.WindowManager
+import androidx.activity.enableEdgeToEdge
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.core.os.bundleOf
+import androidx.camera.view.PreviewView
 import com.darusc.vcamdroid.databinding.ActivityMainBinding
 import com.darusc.vcamdroid.networking.ConnectionManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.darusc.vcamdroid.video.Camera
 
 class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
 
@@ -34,6 +38,8 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
+        enableEdgeToEdge()
+
         camera = Camera(
             viewBinding.viewFinder.surfaceProvider,
             ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888,
@@ -41,7 +47,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
             this,
             this
         )
-        camera.start()
+        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA)
 
         // Prioritize the usb connection through adb
         if (hasUsbConnection()) {
@@ -74,7 +80,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         // Process each incoming image from the camera
         // launchScanTask() will scan and call the callback on success
         // only if start() was called before
-        qrscanner.launchScanTask(imageProxy) { result ->
+        qrscanner.launchScanTask(imageProxy, camera.screenRectToImageRect(viewBinding.overlay.rect, viewBinding.overlay.size)) { result ->
             if(result != null) {
                 connectionManager.connect(result.address, result.port)
             } else {
