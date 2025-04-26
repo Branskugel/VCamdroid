@@ -80,8 +80,8 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	adjustmentsButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/settings.png", wxBITMAP_TYPE_PNG));
 	controlsSizer->Add(adjustmentsButton, 0, wxRIGHT, 10);
 
-	photoButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/photo.png", wxBITMAP_TYPE_PNG));
-	controlsSizer->Add(photoButton);
+	swapButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/swap.png", wxBITMAP_TYPE_PNG));
+	controlsSizer->Add(swapButton);
 
 
 	sizer->Add(settingsSizer, 0, wxALIGN_CENTER_VERTICAL);
@@ -124,7 +124,7 @@ wxButton* Window::GetAdjustmentsButton()
 	return adjustmentsButton;
 }
 
-wxButton* Window::GetPhotoButton()
+wxButton* Window::GetSwapButton()
 {
-	return photoButton;
+	return swapButton;
 }

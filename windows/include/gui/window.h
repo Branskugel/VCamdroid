@@ -25,7 +25,7 @@ public:
 	wxButton* GetRotateRightButton();
 	wxButton* GetFlipButton();
 	wxButton* GetAdjustmentsButton();
-	wxButton* GetPhotoButton();
+	wxButton* GetSwapButton();
 
 private:
 	Canvas* canvas;
@@ -37,7 +37,7 @@ private:
 	wxButton* rotateRightButton;
 	wxButton* flipButton;
 	wxButton* adjustmentsButton;
-	wxButton* photoButton;
+	wxButton* swapButton;
 
 	void InitializeMenu(Server::HostInfo hostinfo);
 	void InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer);

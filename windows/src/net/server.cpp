@@ -113,6 +113,15 @@ void Server::SetStreamingDevice(int device)
 	}
 }
 
+void Server::SetStreamingCamera(bool back)
+{
+	unsigned char bytes[2] = { PacketType::CAMERA, back ? 0x01 : 0x00 };
+	for (auto& conn : connections)
+	{
+		conn->Send(bytes, 2);
+	}
+}
+
 int Server::GetStreamingDevice()
 {
 	for (int i = 0; i < connections.size(); i++)

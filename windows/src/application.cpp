@@ -12,6 +12,7 @@ Application::Application()
 	wxInitAllImageHandlers();
 	//wxImageHandler::
 
+	backCameraActive = true;
 	stream = std::make_unique<Stream>([&](const wxImage& image) {
 		mainWindow->GetCanvas()->Render(image);
 	});
@@ -65,6 +66,11 @@ Application::Application()
 		});
 
 		dialog.ShowModal();
+	});
+
+	mainWindow->GetSwapButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
+		backCameraActive = !backCameraActive;
+		server->SetStreamingCamera(backCameraActive);
 	});
 }
 

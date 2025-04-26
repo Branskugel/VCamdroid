@@ -8,8 +8,9 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.darusc.vcamdroid.databinding.ActivityStreamBinding
-import com.darusc.vcamdroid.networking.Connection
 import com.darusc.vcamdroid.networking.ConnectionManager
+import com.darusc.vcamdroid.video.Camera
+import com.darusc.vcamdroid.video.toJpeg
 
 class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallback {
 
@@ -33,7 +34,7 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
             this
         )
 
-        startCamera(640, 480, CameraSelector.DEFAULT_BACK_CAMERA)
+        camera.start()
 
         connectionManager.setOnBytesReceivedCallback { buffer, bytes ->
             val type = buffer[0]
@@ -41,7 +42,14 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
                 ConnectionManager.PacketType.RESOLUTION -> {
                     val width = (buffer[1].toInt() and 0xFF) or (buffer[2].toInt() shl 8)
                     val height = (buffer[3].toInt() and 0xFF) or (buffer[4].toInt() shl 8)
-                    startCamera(width, height, CameraSelector.DEFAULT_BACK_CAMERA)
+                    camera.start(Size(width, height), CameraSelector.DEFAULT_BACK_CAMERA)
+                }
+                ConnectionManager.PacketType.CAMERA -> {
+                    val back = buffer[1].toInt() == 0x01;
+                    camera.start(
+                        if(back) CameraSelector.DEFAULT_BACK_CAMERA
+                        else CameraSelector.DEFAULT_FRONT_CAMERA
+                    )
                 }
             }
         }
@@ -49,10 +57,6 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
 
     override fun onDisconnected() {
         Log.e(TAG, "Connection disconnected")
-    }
-
-    private fun startCamera(width: Int, height: Int, camera: CameraSelector) {
-        this.camera.start(Size(width, height), camera)
     }
 
     private fun processImage(image: ImageProxy) {

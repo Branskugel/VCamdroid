@@ -67,6 +67,13 @@ class Camera(
         start(Size(640, 480), CameraSelector.DEFAULT_BACK_CAMERA)
     }
 
+    /**
+     * Start with the implicit resolution and a given camera
+     */
+    fun start(cameraSelector: CameraSelector) {
+        start(resolution, cameraSelector)
+    }
+
     fun start(resolution: Size, cameraSelector: CameraSelector) {
         this.resolution = resolution
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)

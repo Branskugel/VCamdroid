@@ -20,7 +20,8 @@ private:
 
 	std::unique_ptr<Server> server;
 	std::unique_ptr<Stream> stream;
-	
+	bool backCameraActive;
+
 	void UpdateAvailableDevices() const;
 
 	void OnMenuEvent(wxCommandEvent& event);
