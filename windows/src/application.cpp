@@ -35,11 +35,18 @@ Application::Application()
 		int selection = mainWindow->GetResolutionChoice()->GetSelection();
 		
 		if (selection == 0)
+		{
+			mainWindow->GetCanvas()->SetAspectRatio(4, 3);
 			server->SetStreamResolution(640, 480);
+		}
 		else if (selection == 1)
-			server->SetStreamResolution(1280, 720);
-		else if(selection == 2)
-			server->SetStreamResolution(1920, 1080);
+		{
+			mainWindow->GetCanvas()->SetAspectRatio(16, 9);
+			if (selection == 1)
+				server->SetStreamResolution(1280, 720);
+			else if (selection == 2)
+				server->SetStreamResolution(1920, 1080);
+		}
 	});
 
 	mainWindow->GetRotateLeftButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {

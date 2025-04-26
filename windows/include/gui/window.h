@@ -8,7 +8,7 @@
 class Window : public wxFrame
 {
 public:
-	static struct MenuIDs
+	struct MenuIDs
 	{
 		static const int QR = 100;
 		static const int DEVICES = 101;
@@ -26,7 +26,6 @@ public:
 	wxButton* GetFlipButton();
 	wxButton* GetAdjustmentsButton();
 	wxButton* GetSwapButton();
-
 private:
 	Canvas* canvas;
 

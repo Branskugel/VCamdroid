@@ -25,6 +25,22 @@ void Canvas::Render(const wxImage& image)
 	this->Update();
 }
 
+void Canvas::SetAspectRatio(int w, int h)
+{
+	if (w == 4 && h == 3) 
+	{
+		size = wxSize(400, 300);
+		bitmap = wxBitmap(400, 300);
+		shorter = false;
+	}
+	else if (w == 16 && h == 9) 
+	{
+		size = wxSize(400, 225);
+		bitmap = wxBitmap(400, 225);
+		shorter = true;
+	}
+}
+
 void Canvas::OnPaint(wxPaintEvent& event)
 {
 	wxAutoBufferedPaintDC dc(this);
@@ -32,7 +48,7 @@ void Canvas::OnPaint(wxPaintEvent& event)
 	
 	if (shouldDraw)
 	{
-		dc.DrawBitmap(bitmap, 0, 0, false);
+		dc.DrawBitmap(bitmap, 0, shorter ? 37 : 0, false);
 	}
 	else
 	{
@@ -40,6 +56,4 @@ void Canvas::OnPaint(wxPaintEvent& event)
 		dc.SetPen(*wxGREY_PEN);
 		dc.DrawRectangle(0, 0, size.x, size.y);
 	}
-
-
 }

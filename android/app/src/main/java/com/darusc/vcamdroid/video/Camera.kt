@@ -36,6 +36,16 @@ class Camera(
 
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private lateinit var resolution: Size
+    private lateinit var cameraSelector: CameraSelector
+
+    val aspectRation: String
+        get() {
+            return if(resolution.width == 640 && resolution.height == 480) {
+                "4:3"
+            } else {
+                "16:9"
+            }
+        }
 
     private fun buildResolutionSelector(resolution: Size) =
         ResolutionSelector.Builder()
@@ -74,8 +84,16 @@ class Camera(
         start(resolution, cameraSelector)
     }
 
+    /**
+     * Start with the implicit cameraSelector and a given resolution
+     */
+    fun start(resolution: Size) {
+        start(resolution, cameraSelector)
+    }
+
     fun start(resolution: Size, cameraSelector: CameraSelector) {
         this.resolution = resolution
+        this.cameraSelector = cameraSelector
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({

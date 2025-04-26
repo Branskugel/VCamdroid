@@ -8,12 +8,14 @@ public:
 	Canvas(wxWindow* parent, wxPoint position, wxSize size);
 
 	void Render(const wxImage& image);
+	void SetAspectRatio(int w, int h);
 
 private:
 	wxSize size;
 	wxBitmap bitmap;
 
 	bool shouldDraw = false;
+	bool shorter = false;
 	
 	void OnPaint(wxPaintEvent& event);
 };

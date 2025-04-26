@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import androidx.constraintlayout.widget.ConstraintSet
 import com.darusc.vcamdroid.databinding.ActivityStreamBinding
 import com.darusc.vcamdroid.networking.ConnectionManager
 import com.darusc.vcamdroid.video.Camera
@@ -42,7 +44,8 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
                 ConnectionManager.PacketType.RESOLUTION -> {
                     val width = (buffer[1].toInt() and 0xFF) or (buffer[2].toInt() shl 8)
                     val height = (buffer[3].toInt() and 0xFF) or (buffer[4].toInt() shl 8)
-                    camera.start(Size(width, height), CameraSelector.DEFAULT_BACK_CAMERA)
+                    camera.start(Size(width, height))
+                    setPreviewAspectRatio(camera.aspectRation)
                 }
                 ConnectionManager.PacketType.CAMERA -> {
                     val back = buffer[1].toInt() == 0x01;
@@ -67,5 +70,15 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
             connectionManager.sendVideoStreamFrame(bytes)
         }
         image.close()
+    }
+
+    private fun setPreviewAspectRatio(aspectRatio: String) {
+        runOnUiThread {
+            val constraintSet = ConstraintSet().apply {
+                clone(viewBinding.root)
+                setDimensionRatio(viewBinding.viewFinder.id, aspectRatio)
+            }
+            constraintSet.applyTo(viewBinding.root)
+        }
     }
 }
