@@ -127,6 +127,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     class TCPConnection(
         ipAddress: String,
         port: Int,
+        private val isOverAdb: Boolean,
         private val listener: Connection.Listener
     ) : Connection() {
 
@@ -168,6 +169,11 @@ class ConnectionManager private constructor() : Connection.Listener {
             while (running.get()) {
                 try {
                     val bytes = inputStream?.read(buf)
+                    // When connected over ADB stream end of file might be reached
+                    if(isOverAdb && bytes == -1) {
+                        listener.onDisconnected()
+                        break
+                    }
                     listener.onBytesReceived(buf, bytes ?: 0)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error while reading. Closing socket. ${e.message}")
@@ -179,8 +185,8 @@ class ConnectionManager private constructor() : Connection.Listener {
 
         override fun close() {
             running.set(false)
-            thread.join()
             socket.close()
+            thread.join()
         }
     }
 
@@ -203,7 +209,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     fun connect(ipAddress: String, port: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                tcpConn = TCPConnection(ipAddress, port, this@ConnectionManager)
+                tcpConn = TCPConnection(ipAddress, port, false, this@ConnectionManager)
                 udpConn = UDPConnection(ipAddress, port)
                 tcpConn!!.send("AndroidClient".toByteArray())
                 connectionStateCallback?.onConnectionSuccessful(Mode.WIFI)
@@ -221,7 +227,7 @@ class ConnectionManager private constructor() : Connection.Listener {
     fun connect(port: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                tcpConn = TCPConnection("127.0.0.1", port, this@ConnectionManager)
+                tcpConn = TCPConnection("127.0.0.1", port, true, this@ConnectionManager)
                 tcpConn!!.send("AndroidClient".toByteArray())
                 connectionStateCallback?.onConnectionSuccessful(Mode.USB)
             } catch (e: Connection.ConnectionFailedException) {
@@ -278,9 +284,11 @@ class ConnectionManager private constructor() : Connection.Listener {
     }
 
     override fun onDisconnected() {
-        streamingEnabled = false
-        tcpConn?.close()
-        udpConn?.close()
-        connectionStateCallback?.onDisconnected()
+        CoroutineScope(Dispatchers.Main).launch {
+            streamingEnabled = false
+            udpConn?.close()
+            tcpConn?.close()
+            connectionStateCallback?.onDisconnected()
+        }
     }
 }

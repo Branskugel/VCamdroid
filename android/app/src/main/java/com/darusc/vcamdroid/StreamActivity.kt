@@ -1,8 +1,11 @@
 package com.darusc.vcamdroid
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
@@ -60,6 +63,8 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
 
     override fun onDisconnected() {
         Log.e(TAG, "Connection disconnected")
+        Toast.makeText(this, "Connection interrupted!", Toast.LENGTH_LONG).show()
+        finish()
     }
 
     private fun processImage(image: ImageProxy) {

@@ -57,6 +57,11 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA)
+    }
+
     override fun onConnectionSuccessful(connectionMode: ConnectionManager.Mode) {
         qrscanner.stop()
         Log.d(TAG, "Connection successful $connectionMode")
