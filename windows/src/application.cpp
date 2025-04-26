@@ -11,10 +11,16 @@ Application::Application()
 {
 	wxInitAllImageHandlers();
 	//wxImageHandler::
+	
+	// Create a camera handle to access the DirechShow Virtual Camera filter
+	camera = scCreateCamera(640, 480, 30);
 
 	backCameraActive = true;
 	stream = std::make_unique<Stream>([&](const wxImage& image) {
 		mainWindow->GetCanvas()->Render(image);
+
+		// Send the current image frame to the DirechShow Virtual Camera filter
+		scSendFrame(camera, image.GetData());
 	});
 
 	server = std::make_unique<Server>(6969, *this, *stream);

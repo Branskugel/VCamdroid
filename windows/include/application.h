@@ -6,6 +6,8 @@
 #include "net/server.h"
 #include "stream.h"
 
+#include "softcam/softcam.h"
+
 class Application : public wxApp, public Server::ConnectionListener
 {
 public:
@@ -18,6 +20,7 @@ public:
 private:
 	Window* mainWindow;
 
+	scCamera camera;
 	std::unique_ptr<Server> server;
 	std::unique_ptr<Stream> stream;
 	bool backCameraActive;
