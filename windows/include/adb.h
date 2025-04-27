@@ -26,7 +26,7 @@ namespace adb
 	bool start(int port)
 	{
 		std::string path = dir();
-		std::string command = path + "\\adb.exe " + "reverse tcp:" + std::to_string(port) + " tcp:" + std::to_string(port);
+		std::string command = path + "\\adb\\adb.exe " + "reverse tcp:" + std::to_string(port) + " tcp:" + std::to_string(port);
 
 		if (system(command.c_str()) == 0)
 		{
@@ -47,7 +47,7 @@ namespace adb
 	bool kill(int port)
 	{
 		std::string path = dir();
-		std::string command = path + "\\adb.exe " + "reverse --remove tcp:" + std::to_string(port);
+		std::string command = path + "\\adb\\adb.exe " + "reverse --remove tcp:" + std::to_string(port);
 
 		if (system(command.c_str()) == 0)
 		{

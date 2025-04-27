@@ -1,0 +1,1 @@
+./dist/adb/adb.exe install -r apk/app-release.apk

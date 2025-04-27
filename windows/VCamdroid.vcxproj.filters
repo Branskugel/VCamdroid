@@ -30,7 +30,7 @@
     <ClCompile Include="src\stream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\server.cpp">
+    <ClCompile Include="src\net\server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\imgadjdlg.cpp">
@@ -40,6 +40,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\qrconview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\connection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\receiver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,7 +62,7 @@
     <ClInclude Include="include\stream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\server.h">
+    <ClInclude Include="include\net\server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\logger.h">
@@ -69,6 +75,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\qrconview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\net\connection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\net\receiver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\adb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

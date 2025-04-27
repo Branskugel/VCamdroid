@@ -1,7 +1,9 @@
-<h1 align="center">
-    <img style="vertical-align:middle" src="imgs/icon.png" witdh=64 height=64/>
-    VCamdroid
-</h1>
+<div style="display: flex; align-items: center; justify-content: center">
+    <img src="imgs/icon.png" width=64 height=64>
+    <h3 style="font-size: 34px">VCamdroid</h3>
+</div>
+
+****
 
 <h3 align="center">Use your android phone as windows virtual webcam</h3>
 
@@ -21,7 +23,33 @@ VCamdroid is a Windows application that allows you to use your Android phone as 
 8. **Preview Mode**: Preview the video feed before activating the virtual webcam.
 
 ## How to install
-    TODO...
+Download the prebuilt binaries from the [releases](https://github.com/darusc/VCamdroid/releases) page or build them yourself. (See [this](https://github.com/darusc/VCamdroid/blob/main/windows/README.md) for instructions on how to build the server)
+
+Run ```install.bat``` This will register the softcam.dll to the system to make the DirectShow virtual camera filter avaialable to other apps.
+
+To install VCamdroid on your phone make sure your phone is connected to your pc and usb debugging is enabled and run ```install_apk.bat```.
+
+That's all. You can now use the app.
+
+### Usb debugging
+
+First **enable developer mode** - go to **Settings > About**. Find the **Build number** and tap on it seven times. 
+  Then go to **Settings > Developer options** and enable USB debugging.
+  Build number and developer options location might vary based on your phone model and android version. See https://developer.android.com/studio/debug/dev-options for more details.
+
+## How to use
+**If you want to connect with a USB cable you must do the following:**
+- Enable usb debugging on your phone. See the last section of **How to install**
+- Plug in your phone to your pc.
+- Start the windows app.
+- Start the android app.
+
+If everything works correctly your phone will automatically connect to the server.
+
+**To connect via WIFI you must do the following:**
+- Start both apps, windows and android
+- In the windows app go to the connect tab to display the QR code.
+- Scan the QR code with the phone app to connect
 
 
 ## How it works
@@ -46,8 +74,3 @@ Video frames are captured using [CameraX](https://developer.android.com/media/ca
 
 <p align="center"><img src="imgs/pipeline.png"/></p>
 <p align="center">Video stream pipeline</p>
-
-
-
-
-
