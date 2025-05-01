@@ -1,11 +1,11 @@
-<div style="display: flex; align-items: center; justify-content: center">
+<!-- <div style="display: flex; align-items: center; justify-content: center">
     <img src="imgs/icon.png" width=64 height=64>
     <h3 style="font-size: 34px">VCamdroid</h3>
-</div>
+</div> -->
 
-****
+<img src="imgs/icon2.png">
 
-<h3 align="center">Use your android phone as windows virtual webcam</h3>
+# <ins>VCamdroid</ins> - Use your android phone as a windows virtual webcam
 
 ## Description
 
