@@ -1,6 +1,8 @@
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/taskbar.h>
+#include <map>
 
 #include "canvas.h"
 #include "net/server.h"
@@ -12,9 +14,11 @@ public:
 	{
 		static const int QR = 100;
 		static const int DEVICES = 101;
+		static const int HIDE2TRAY = 102;
 	};
 
 	Window(Server::HostInfo hostInfo);
+	~Window();
 
 	Canvas* GetCanvas();
 
@@ -27,6 +31,7 @@ public:
 	wxButton* GetAdjustmentsButton();
 	wxButton* GetSwapButton();
 private:
+	wxTaskBarIcon* taskbarIcon;
 	Canvas* canvas;
 
 	wxChoice* sourceChoice;
@@ -41,4 +46,7 @@ private:
 	void InitializeMenu(Server::HostInfo hostinfo);
 	void InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer);
 	void InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer);
+	
+	void MinimizeToTaskbar(wxIconizeEvent& evt);
+	void MaximizeFromTaskbar(wxTaskBarIconEvent& evt);
 };

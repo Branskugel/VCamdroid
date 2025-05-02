@@ -4,11 +4,13 @@
 #include "gui/devicesview.h"
 #include "gui/qrconview.h"
 #include "adb.h"
+#include "settings.h"
 
 #include <qrcodegen.hpp>
 
 Application::Application()
 {
+	Settings::load();
 	wxInitAllImageHandlers();
 	//wxImageHandler::
 	
@@ -135,6 +137,12 @@ void Application::OnMenuEvent(wxCommandEvent& event)
 			
 			break;
 		}
+		
+		case Window::MenuIDs::HIDE2TRAY:
+		{
+			Settings::set("MINIMIZE_TASKBAR", event.IsChecked() ? 1 : 0);
+			break;
+		}
 	}
 }
 
@@ -143,5 +151,6 @@ void Application::OnWindowCloseEvent(wxCloseEvent& event)
 	stream->Close();
 	server->Close();
 	adb::kill(6969);
+	Settings::save();
 	mainWindow->Destroy();
 }

@@ -1,4 +1,6 @@
 #include "gui/window.h"
+#include "settings.h"
+#include "icon.xpm"
 
 #include <iostream>
 #include <thread>
@@ -11,6 +13,11 @@ Window::Window(Server::HostInfo hostinfo)
 	wxPanel* panel = new wxPanel(this, wxID_ANY);
 	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
+	taskbarIcon = new wxTaskBarIcon();
+	taskbarIcon->SetIcon(icon, "VCamdroid");
+	taskbarIcon->Bind(wxEVT_TASKBAR_LEFT_DCLICK, &Window::MaximizeFromTaskbar, this);
+	Bind(wxEVT_ICONIZE, &Window::MinimizeToTaskbar, this);
+
 	InitializeMenu(hostinfo);
 	InitializeCanvasPanel(panel, topsizer);
 	InitializeControlPanel(panel, topsizer);
@@ -18,13 +25,18 @@ Window::Window(Server::HostInfo hostinfo)
 	panel->SetSizerAndFit(topsizer);
 }
 
+Window::~Window()
+{
+	delete taskbarIcon;
+}
+
 void Window::InitializeMenu(Server::HostInfo hostinfo)
 {
 	wxMenuBar* menuBar = new wxMenuBar();
 
 	wxMenu* file = new wxMenu();
-	file->AppendCheckItem(wxID_ANY, "Hide to tray");
-	file->AppendCheckItem(wxID_ANY, "Run at startup");
+	auto c1 = file->AppendCheckItem(MenuIDs::HIDE2TRAY, "Hide to tray");
+	c1->Check(Settings::get("MINIMIZE_TASKBAR") == 1);
 	file->Append(wxID_ANY, "About");
 	file->AppendSeparator();
 	file->Append(wxID_ANY, "Exit");
@@ -87,6 +99,23 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	sizer->Add(settingsSizer, 0, wxALIGN_CENTER_VERTICAL);
 	sizer->Add(controlsSizer, 0, wxALIGN_CENTER_VERTICAL);
 	topsizer->Add(sizer, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 20);
+}
+
+void Window::MinimizeToTaskbar(wxIconizeEvent& evt)
+{
+	if (Settings::get("MINIMIZE_TASKBAR") == 1)
+	{
+		this->Hide();
+		evt.Skip();
+	}
+}
+
+void Window::MaximizeFromTaskbar(wxTaskBarIconEvent& evt)
+{
+	this->Iconize(false);
+	this->SetFocus();
+	this->Raise();
+	this->Show();
 }
 
 Canvas* Window::GetCanvas()
