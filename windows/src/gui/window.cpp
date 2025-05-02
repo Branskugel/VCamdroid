@@ -18,6 +18,7 @@ Window::Window(Server::HostInfo hostinfo)
 	taskbarIcon->Bind(wxEVT_TASKBAR_LEFT_DCLICK, &Window::MaximizeFromTaskbar, this);
 	Bind(wxEVT_ICONIZE, &Window::MinimizeToTaskbar, this);
 
+	SetIcon(icon);
 	InitializeMenu(hostinfo);
 	InitializeCanvasPanel(panel, topsizer);
 	InitializeControlPanel(panel, topsizer);
