@@ -19,6 +19,7 @@ namespace adb
 		return path.substr(0, path.find_last_of("\\/"));
 	}
 
+	
 	/*
 	* Reverse the given tcp port.
 	* adb reverse tcp:<port> tcp:<port>
@@ -47,7 +48,7 @@ namespace adb
 	bool kill(int port)
 	{
 		std::string path = dir();
-		std::string command = path + "\\adb\\adb.exe " + "reverse --remove tcp:" + std::to_string(port);
+		std::string command = path + "\\adb\\adb.exe " + "reverse --remove tcp:" + std::to_string(port) + " & " + path + "\\adb\\adb.exe kill-server";
 
 		if (system(command.c_str()) == 0)
 		{
