@@ -1,13 +1,6 @@
-<h1  align="center">
-  <sub>
-    <img src="imgs/icon2.png"  witdh=38  height=38></img>
-  </sub>
-  VCamdroid
-</h1>
+<img align="left" width="80" height="80" src="imgs/icon2.png">
 
-<p align="center">Use your android phone as a windows virtual webcam.</p>
-
-## Description
+# VCamdroid
 
 VCamdroid is a Windows application that allows you to use your Android phone as a virtual webcam. It leverages a custom DirectShow filter, implemented using the [Softcam library](https://github.com/tshino/softcam), to create a virtual webcam device on your Windows machine. The video stream is fed directly from your Android phone, enabling seamless integration with any application that supports webcams.
 
