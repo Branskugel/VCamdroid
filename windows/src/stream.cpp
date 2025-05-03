@@ -15,6 +15,11 @@ void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const
 	if (closed)
 		return;
 
+	// Calculate the time between 2 consecutive received frames
+	auto now = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - previousTimepoint);
+	previousTimepoint = now;
+
 	// Load the image directly from memory
 	// https://docs.wxwidgets.org/trunk/classwx_memory_input_stream.html
 	wxMemoryInputStream stream(bytes, length);
@@ -25,7 +30,7 @@ void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const
 
 	if (onFrameReady)
 	{
-		onFrameReady(ApplyFrameTransformsAndAdjustments());
+		onFrameReady(ApplyFrameTransformsAndAdjustments(), { duration.count(), length });
 	}
 }
 

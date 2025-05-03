@@ -4,13 +4,20 @@
 
 #include <functional>
 #include <vector>
+#include <chrono>
 
 #include "net/receiver.h"
 
 class Stream : public Receiver::FrameReceivedListener
 {
 public:
-	using OnFrameReadyCallback = std::function<void(const wxImage& image)>;
+	struct FrameStats
+	{
+		long long time;
+		size_t size;
+	};
+
+	using OnFrameReadyCallback = std::function<void(const wxImage& image, FrameStats stats)>;
 
 	struct Transforms
 	{
@@ -64,4 +71,6 @@ private:
 
 	Transforms transforms;
 	Adjustments adjustments;
+
+	mutable std::chrono::high_resolution_clock::time_point previousTimepoint;
 };

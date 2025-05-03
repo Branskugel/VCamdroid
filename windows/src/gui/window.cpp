@@ -36,8 +36,13 @@ void Window::InitializeMenu(Server::HostInfo hostinfo)
 	wxMenuBar* menuBar = new wxMenuBar();
 
 	wxMenu* file = new wxMenu();
+	
 	auto c1 = file->AppendCheckItem(MenuIDs::HIDE2TRAY, "Hide to tray");
 	c1->Check(Settings::get("MINIMIZE_TASKBAR") == 1);
+
+	auto c2 = file->AppendCheckItem(MenuIDs::SHOWSTATS, "Show frame stats");
+	c2->Check(Settings::get("SHOW_STATS") == 1);
+
 	file->Append(wxID_ANY, "About");
 	file->AppendSeparator();
 	file->Append(wxID_ANY, "Exit");
@@ -65,7 +70,7 @@ void Window::InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer)
 
 void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 {
-	wxGridSizer* sizer = new wxGridSizer(1, 2, 0, 5);
+	wxGridSizer* sizer = new wxGridSizer(2, 2, 20, 5);
 	
 	wxFlexGridSizer* settingsSizer = new wxFlexGridSizer(2, 2, 5, 5);
 	                                                                                                        
@@ -99,7 +104,13 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 
 	sizer->Add(settingsSizer, 0, wxALIGN_CENTER_VERTICAL);
 	sizer->Add(controlsSizer, 0, wxALIGN_CENTER_VERTICAL);
-	topsizer->Add(sizer, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 20);
+
+	statsText = new wxStaticText(parent, wxID_ANY, "frame time: -ms | frame size: -kb");
+	statsText->Show(Settings::get("SHOW_STATS") == 1);
+	sizer->AddSpacer(0);
+	sizer->Add(statsText, 0, wxALIGN_RIGHT);
+
+	topsizer->Add(sizer, 0, wxTOP | wxALIGN_CENTER_HORIZONTAL, 15);
 }
 
 void Window::MinimizeToTaskbar(wxIconizeEvent& evt)
@@ -157,4 +168,9 @@ wxButton* Window::GetAdjustmentsButton()
 wxButton* Window::GetSwapButton()
 {
 	return swapButton;
+}
+
+wxStaticText* Window::GetStatsText()
+{
+	return statsText;
 }

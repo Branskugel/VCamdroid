@@ -17,6 +17,7 @@ public:
 	
 	virtual void OnDeviceConnected() const override;
 	virtual void OnDeviceDisconnected() const override;
+
 private:
 	Window* mainWindow;
 
@@ -32,4 +33,6 @@ private:
 	void OnWindowCloseEvent(wxCloseEvent& event);
 
 	void ScCameraInit(int width, int height);
+
+	void UpdateFrameStats(Stream::FrameStats stats);
 };

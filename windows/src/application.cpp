@@ -19,13 +19,14 @@ Application::Application()
 	ScCameraInit(640, 480);
 
 	backCameraActive = true;
-	stream = std::make_unique<Stream>([&](const wxImage& image) {
+	stream = std::make_unique<Stream>([&](const wxImage& image, Stream::FrameStats stats) {
 		// Check the image dimensions
 		// After changing the resolution there might still be incoming 
 		// frames with the previous resolution and those need to be skipped
 		if (image.GetWidth() == cameraWidth && image.GetHeight() == cameraHeight)
 		{
 			mainWindow->GetCanvas()->Render(image);
+			UpdateFrameStats(stats);
 
 			// Send the current image frame to the DirechShow Virtual Camera filter
 			scSendFrame(camera, stream->GetBGR(image));
@@ -165,6 +166,13 @@ void Application::OnMenuEvent(wxCommandEvent& event)
 			Settings::set("MINIMIZE_TASKBAR", event.IsChecked() ? 1 : 0);
 			break;
 		}
+
+		case Window::MenuIDs::SHOWSTATS:
+		{
+			Settings::set("SHOW_STATS", event.IsChecked() ? 1 : 0);
+			mainWindow->GetStatsText()->Show(event.IsChecked());
+			break;
+		}
 	}
 }
 
@@ -185,4 +193,12 @@ void Application::ScCameraInit(int width, int height)
 	cameraWidth = width;
 	cameraHeight = height;
 	camera = scCreateCamera(width, height, 0);
+}
+
+void Application::UpdateFrameStats(Stream::FrameStats stats)
+{
+	if (Settings::get("SHOW_STATS"))
+	{
+		mainWindow->GetStatsText()->SetLabel(wxString::Format("frame time: %lldms | frame size: %lldkb", stats.time, stats.size / 1024));
+	}
 }

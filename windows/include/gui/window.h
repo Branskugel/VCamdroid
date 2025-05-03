@@ -15,6 +15,7 @@ public:
 		static const int QR = 100;
 		static const int DEVICES = 101;
 		static const int HIDE2TRAY = 102;
+		static const int SHOWSTATS = 103;
 	};
 
 	Window(Server::HostInfo hostInfo);
@@ -30,6 +31,7 @@ public:
 	wxButton* GetFlipButton();
 	wxButton* GetAdjustmentsButton();
 	wxButton* GetSwapButton();
+	wxStaticText* GetStatsText();
 private:
 	wxTaskBarIcon* taskbarIcon;
 	Canvas* canvas;
@@ -42,6 +44,7 @@ private:
 	wxButton* flipButton;
 	wxButton* adjustmentsButton;
 	wxButton* swapButton;
+	wxStaticText* statsText;
 
 	void InitializeMenu(Server::HostInfo hostinfo);
 	void InitializeCanvasPanel(wxPanel* parent, wxBoxSizer* topsizer);
