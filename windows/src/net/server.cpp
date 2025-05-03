@@ -1,6 +1,7 @@
 #include "net/server.h"
 
 #include "logger.h"
+#include "adb.h"
 
 Server::Server(int port, const ConnectionListener& connectionListener, const Receiver::FrameReceivedListener& frameReceivedListener)
 	: Receiver(640 * 480 * 3, 65472, frameReceivedListener),
@@ -10,7 +11,7 @@ Server::Server(int port, const ConnectionListener& connectionListener, const Rec
 	udpsocket(context, udp::endpoint(asio::ip::udp::v4(), port))
 {
 	streamingDevice = 0;
-
+	adb::start(port);
 	StartReceive();
 }
 
@@ -69,6 +70,8 @@ void Server::Close()
 	{
 		thread.join();
 	}
+
+	adb::kill(port);
 
 	logger << "[SERVER] Closed.\n";
 }
@@ -183,7 +186,7 @@ void Server::StartReceive()
 			// frame before the server finished processing the current 
 			// one result in loss of data
 			// The client waits to read some bytes after between sending segments
-			udpsocket.send_to(asio::buffer("done"), remote_endpoint);
+			// udpsocket.send_to(asio::buffer("done"), remote_endpoint);
 
 			StartReceive();
 		}

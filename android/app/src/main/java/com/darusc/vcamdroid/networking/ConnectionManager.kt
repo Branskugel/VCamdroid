@@ -104,13 +104,17 @@ class ConnectionManager private constructor() : Connection.Listener {
         }
 
         override fun send(bytes: ByteArray) {
-            socket.send(DatagramPacket(bytes, bytes.size, address, port))
-            socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
+            try {
+                socket.send(DatagramPacket(bytes, bytes.size, address, port))
+                //socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
+            } catch (_: Exception) {}
         }
 
         override fun send(bytes: ByteArray, size: Int) {
-            socket.send(DatagramPacket(bytes, size, address, port))
-            socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
+            try {
+                socket.send(DatagramPacket(bytes, size, address, port))
+                //socket.receive(DatagramPacket(ByteArray(5), 5, address, port))
+            } catch (_: Exception) {}
         }
 
         override fun close() {

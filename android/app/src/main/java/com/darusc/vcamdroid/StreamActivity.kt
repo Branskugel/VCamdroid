@@ -69,7 +69,6 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
 
     private fun processImage(image: ImageProxy) {
         val bytes = image.toJpeg(80)
-        image.close()
 
         bytes?.let {
             connectionManager.sendVideoStreamFrame(bytes)
