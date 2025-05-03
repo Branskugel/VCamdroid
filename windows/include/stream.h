@@ -58,10 +58,13 @@ public:
 
 	unsigned char* GetBGR(const wxImage& image);
 
+	void Pause();
+	void Unpause();
 	void Close();
 
 private:
 	bool closed;
+	bool paused;
 
 	int bgrSize = 0;
 	unsigned char* bgrData = nullptr;

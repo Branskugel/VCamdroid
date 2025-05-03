@@ -6,13 +6,14 @@
 Stream::Stream(OnFrameReadyCallback fn) : onFrameReady(fn)
 {
 	closed = false;
+	paused = false;
 	transforms = { 0, 0 };
 	adjustments = { 0, 0, 80 };
 }
 
 void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const
 {
-	if (closed)
+	if (closed || paused)
 		return;
 
 	// Calculate the time between 2 consecutive received frames
@@ -124,6 +125,16 @@ unsigned char* Stream::GetBGR(const wxImage& image)
 	}
 
 	return bgrData;
+}
+
+void Stream::Pause()
+{
+	paused = true;
+}
+
+void Stream::Unpause()
+{
+	paused = false;
 }
 
 void Stream::Close()

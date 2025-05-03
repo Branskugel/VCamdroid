@@ -47,33 +47,50 @@ Application::Application()
 	});
 
 	mainWindow->GetResolutionChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
+		// Pause the stream so no more frames
+		// are sent to the Softcam DirectShow filter
+		// Do this in order to avoid deleting the current camera 
+		// while still writing to the video buffer which will result
+		// in a memory violation error
+		//
+		// The other functions before ScCameraInit should add enough
+		// delay so the previous frame is done writing to the video buffer
+		// 
+		// (not ideal -> TODO: add a better synchronization mechanism)
+		stream->Pause();
+
 		int selection = mainWindow->GetResolutionChoice()->GetSelection();
 		
 		if (selection == 0)
 		{
+			logger << "[STREAM] Set stream resolution to 640x480\n";
+
 			mainWindow->GetCanvas()->SetAspectRatio(4, 3);
 			server->SetStreamResolution(640, 480);
 
 			// Update scCamera resolution
 			ScCameraInit(640, 480);
 		}
-		else if (selection == 1)
+		else
 		{
 			mainWindow->GetCanvas()->SetAspectRatio(16, 9);
 			if (selection == 1)
 			{
+				logger << "[STREAM] Set stream resolution to 1280x720\n";
 				server->SetStreamResolution(1280, 720);
 				// Update scCamera resolution
 				ScCameraInit(1280, 720);
-				logger << "Set stream to 1280x720\n";
 			}
 			else if (selection == 2)
 			{
+				logger << "[STREAM] Set stream resolution to 1920x1080\n";
 				server->SetStreamResolution(1920, 1080);
 				// Update scCamera resolution
 				ScCameraInit(1920, 1080);
 			}
 		}
+
+		stream->Unpause();
 	});
 
 	mainWindow->GetRotateLeftButton()->Bind(wxEVT_BUTTON, [&](const wxEvent& arg) {
