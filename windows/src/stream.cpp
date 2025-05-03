@@ -94,6 +94,33 @@ wxImage Stream::ApplyFrameTransformsAndAdjustments() const
 	return result;
 }
 
+unsigned char* Stream::GetBGR(const wxImage& image)
+{
+	int w = image.GetWidth();
+	int h = image.GetHeight();
+
+	int size = w * h * 3;
+	if (bgrData == nullptr || bgrSize != size)
+	{
+		if (bgrData != nullptr)
+		{
+			delete[] bgrData;
+		}
+		bgrSize = size;
+		bgrData = new unsigned char[bgrSize];
+	}
+
+	auto data = image.GetData();
+	for (int i = 0; i < w * h; i++)
+	{
+		bgrData[i * 3] = data[(i * 3) + 2];
+		bgrData[(i * 3) + 1] = data[(i * 3) + 1];
+		bgrData[(i * 3) + 2] = data[i * 3];
+	}
+
+	return bgrData;
+}
+
 void Stream::Close()
 {
 	closed = true;

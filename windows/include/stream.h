@@ -48,11 +48,16 @@ public:
 
 	wxImage ApplyFrameTransformsAndAdjustments() const;
 
+	unsigned char* GetBGR(const wxImage& image);
+
 	void Close();
 
 private:
 	bool closed;
 
+	int bgrSize = 0;
+	unsigned char* bgrData = nullptr;
+	
 	mutable wxImage image;
 	OnFrameReadyCallback onFrameReady;
 

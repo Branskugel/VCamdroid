@@ -9,7 +9,7 @@ class Settings
 public:
 	static void load()
 	{
-		std::ifstream f(dir() + "\\config.ini");
+		std::ifstream f(dir() + "\\settings.cfg");
 		
 		std::string line;
 		while (std::getline(f, line))
@@ -26,7 +26,7 @@ public:
 
 	static void save()
 	{
-		std::ofstream f(dir() + "\\config.ini");
+		std::ofstream f(dir() + "\\settings.cfg");
 
 		for (auto& entry : settings)
 		{

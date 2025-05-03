@@ -3,8 +3,8 @@
 #include "gui/imgadjdlg.h"
 #include "gui/devicesview.h"
 #include "gui/qrconview.h"
-#include "adb.h"
 #include "settings.h"
+#include "logger.h"
 
 #include <qrcodegen.hpp>
 
@@ -15,19 +15,18 @@ Application::Application()
 	//wxImageHandler::
 	
 	// Create a camera handle to access the DirechShow Virtual Camera filter
-	camera = scCreateCamera(640, 480, 30);
+	camera = scCreateCamera(640, 480, 0);
 
 	backCameraActive = true;
 	stream = std::make_unique<Stream>([&](const wxImage& image) {
 		mainWindow->GetCanvas()->Render(image);
 
 		// Send the current image frame to the DirechShow Virtual Camera filter
-		scSendFrame(camera, image.GetData());
+		scSendFrame(camera, stream->GetBGR(image));
 	});
 
 	server = std::make_unique<Server>(6969, *this, *stream);
 	server->Start();
-	adb::start(6969);
 
 	mainWindow = new Window(server->GetHostInfo());
 
@@ -150,7 +149,6 @@ void Application::OnWindowCloseEvent(wxCloseEvent& event)
 {
 	stream->Close();
 	server->Close();
-	adb::kill(6969);
 	Settings::save();
 	mainWindow->Destroy();
 }
