@@ -15,14 +15,21 @@ Application::Application()
 	//wxImageHandler::
 	
 	// Create a camera handle to access the DirechShow Virtual Camera filter
-	camera = scCreateCamera(640, 480, 0);
+	camera = nullptr;
+	ScCameraInit(640, 480);
 
 	backCameraActive = true;
 	stream = std::make_unique<Stream>([&](const wxImage& image) {
-		mainWindow->GetCanvas()->Render(image);
+		// Check the image dimensions
+		// After changing the resolution there might still be incoming 
+		// frames with the previous resolution and those need to be skipped
+		if (image.GetWidth() == cameraWidth && image.GetHeight() == cameraHeight)
+		{
+			mainWindow->GetCanvas()->Render(image);
 
-		// Send the current image frame to the DirechShow Virtual Camera filter
-		scSendFrame(camera, stream->GetBGR(image));
+			// Send the current image frame to the DirechShow Virtual Camera filter
+			scSendFrame(camera, stream->GetBGR(image));
+		}
 	});
 
 	server = std::make_unique<Server>(6969, *this, *stream);
@@ -45,14 +52,26 @@ Application::Application()
 		{
 			mainWindow->GetCanvas()->SetAspectRatio(4, 3);
 			server->SetStreamResolution(640, 480);
+
+			// Update scCamera resolution
+			ScCameraInit(640, 480);
 		}
 		else if (selection == 1)
 		{
 			mainWindow->GetCanvas()->SetAspectRatio(16, 9);
 			if (selection == 1)
+			{
 				server->SetStreamResolution(1280, 720);
+				// Update scCamera resolution
+				ScCameraInit(1280, 720);
+				logger << "Set stream to 1280x720\n";
+			}
 			else if (selection == 2)
+			{
 				server->SetStreamResolution(1920, 1080);
+				// Update scCamera resolution
+				ScCameraInit(1920, 1080);
+			}
 		}
 	});
 
@@ -151,4 +170,15 @@ void Application::OnWindowCloseEvent(wxCloseEvent& event)
 	server->Close();
 	Settings::save();
 	mainWindow->Destroy();
+}
+
+void Application::ScCameraInit(int width, int height)
+{
+	if (camera != nullptr)
+	{
+		scDeleteCamera(camera);
+	}
+	cameraWidth = width;
+	cameraHeight = height;
+	camera = scCreateCamera(width, height, 0);
 }

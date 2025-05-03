@@ -4,7 +4,7 @@
 #include "adb.h"
 
 Server::Server(int port, const ConnectionListener& connectionListener, const Receiver::FrameReceivedListener& frameReceivedListener)
-	: Receiver(640 * 480 * 3, 65472, frameReceivedListener),
+	: Receiver(1920 * 1080 * 3, 65472, frameReceivedListener),
 	port(port),
 	connectionListener(connectionListener),
 	acceptor(tcp::acceptor(context, tcp::endpoint(tcp::v4(), port))),

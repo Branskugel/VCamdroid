@@ -21,6 +21,7 @@ private:
 	Window* mainWindow;
 
 	scCamera camera;
+	int cameraWidth, cameraHeight;
 	std::unique_ptr<Server> server;
 	std::unique_ptr<Stream> stream;
 	bool backCameraActive;
@@ -29,4 +30,6 @@ private:
 
 	void OnMenuEvent(wxCommandEvent& event);
 	void OnWindowCloseEvent(wxCloseEvent& event);
+
+	void ScCameraInit(int width, int height);
 };
