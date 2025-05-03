@@ -7,7 +7,7 @@ Stream::Stream(OnFrameReadyCallback fn) : onFrameReady(fn)
 {
 	closed = false;
 	transforms = { 0, 0 };
-	adjustments = { 0, 0 };
+	adjustments = { 0, 0, 80 };
 }
 
 void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const

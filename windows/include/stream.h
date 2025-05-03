@@ -26,6 +26,7 @@ public:
 	{
 		int brightness;
 		int saturation;
+		int quality;
 	};
 
 	Stream(OnFrameReadyCallback fn);

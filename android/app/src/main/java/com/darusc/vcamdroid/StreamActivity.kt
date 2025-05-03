@@ -24,6 +24,7 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
     private lateinit var viewBinding: ActivityStreamBinding
 
     private lateinit var camera: Camera
+    private var jpegQuality = 80
     private val connectionManager: ConnectionManager = ConnectionManager.getInstance(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +58,9 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
                         else CameraSelector.DEFAULT_FRONT_CAMERA
                     )
                 }
+                ConnectionManager.PacketType.QUALITY -> {
+                    jpegQuality = buffer[1].toInt()
+                }
             }
         }
     }
@@ -68,8 +72,7 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
     }
 
     private fun processImage(image: ImageProxy) {
-        val bytes = image.toJpeg(80)
-
+        val bytes = image.toJpeg(jpegQuality)
         bytes?.let {
             connectionManager.sendVideoStreamFrame(bytes)
         }

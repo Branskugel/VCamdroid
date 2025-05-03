@@ -5,6 +5,7 @@
 
 wxDECLARE_EVENT(EVT_BRIGHTNESS_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SATURATION_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_JPEGQUALITY_CHANGED, wxCommandEvent);
 
 class ImgAdjDlg : public wxDialog
 {
@@ -20,8 +21,12 @@ private:
 	wxStaticText* saturationLabel;
 	wxSlider* saturationSlider;
 
+	wxStaticText* qualityLabel;
+	wxSlider* qualitySlider;
+
 	void OnBrightnessSliderChanged(wxCommandEvent& event);
 	void OnSaturationSliderChanged(wxCommandEvent& event);
+	void OnQualitySliderChanged(wxCommandEvent& event);
 
 	void ResetSliders(wxCommandEvent& event);
 	void SendEvent(int event, int value);

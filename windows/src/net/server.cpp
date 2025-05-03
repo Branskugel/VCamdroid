@@ -125,6 +125,15 @@ void Server::SetStreamingCamera(bool back)
 	}
 }
 
+void Server::SetStreamingQuality(uint8_t quality)
+{
+	unsigned char bytes[2] = { PacketType::QUALITY, quality };
+	for (auto& conn : connections)
+	{
+		conn->Send(bytes, 2);
+	}
+}
+
 int Server::GetStreamingDevice()
 {
 	for (int i = 0; i < connections.size(); i++)

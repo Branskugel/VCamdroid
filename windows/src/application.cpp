@@ -98,6 +98,10 @@ Application::Application()
 			stream->SetSaturationAdjustment(event.GetInt());
 		});
 
+		dialog.Bind(EVT_JPEGQUALITY_CHANGED, [&](const wxCommandEvent& event) {
+			server->SetStreamingQuality(event.GetInt());
+		});
+
 		dialog.ShowModal();
 	});
 
