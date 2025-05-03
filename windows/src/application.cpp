@@ -117,6 +117,7 @@ Application::Application()
 		});
 
 		dialog.Bind(EVT_JPEGQUALITY_CHANGED, [&](const wxCommandEvent& event) {
+			stream->SetQualityAdjustment(event.GetInt());
 			server->SetStreamingQuality(event.GetInt());
 		});
 

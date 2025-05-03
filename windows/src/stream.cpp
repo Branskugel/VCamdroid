@@ -66,6 +66,11 @@ void Stream::SetSaturationAdjustment(int value)
 	adjustments.saturation = value;
 }
 
+void Stream::SetQualityAdjustment(int value)
+{
+	adjustments.quality = value;
+}
+
 const Stream::Adjustments& Stream::GetAdjustments()
 {
 	return adjustments;

@@ -51,6 +51,7 @@ public:
 
 	void SetBrightnessAdjustment(int value);
 	void SetSaturationAdjustment(int value);
+	void SetQualityAdjustment(int value);
 
 	const Adjustments& GetAdjustments();
 
