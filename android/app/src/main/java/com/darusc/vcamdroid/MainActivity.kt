@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     private lateinit var viewBinding: ActivityMainBinding
 
     private val qrscanner = QRScanner()
-    private val connectionManager = ConnectionManager.getInstance(this)
+    private var connectionManager = ConnectionManager.getInstance(this)
     private lateinit var camera: Camera
 
     private var isConnecting = false
@@ -59,7 +59,9 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
 
     override fun onResume() {
         super.onResume()
+        connectionManager = ConnectionManager.getInstance(this)
         camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA)
+        connectWIFI()
     }
 
     override fun onConnectionSuccessful(connectionMode: ConnectionManager.Mode) {

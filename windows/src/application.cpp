@@ -44,6 +44,8 @@ Application::Application()
 	mainWindow->GetSourceChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {
 		int selection = mainWindow->GetSourceChoice()->GetSelection();
 		server->SetStreamingDevice(selection);
+
+		mainWindow->GetResolutionChoice()->SetSelection(0);
 	});
 
 	mainWindow->GetResolutionChoice()->Bind(wxEVT_CHOICE, [&](const wxEvent& arg) {

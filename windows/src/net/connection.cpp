@@ -49,7 +49,7 @@ void Connection::Close(bool stoppedByServer)
 {
 	if (stoppedByServer)
 	{
-		//socket.cancel();
+		socket.cancel();
 		socket.close();
 	}
 	else

@@ -101,7 +101,6 @@ void Window::InitializeControlPanel(wxPanel* parent, wxBoxSizer* topsizer)
 	swapButton = new wxBitmapButton(parent, wxID_ANY, wxBitmap("res/swap.png", wxBITMAP_TYPE_PNG));
 	controlsSizer->Add(swapButton);
 
-
 	sizer->Add(settingsSizer, 0, wxALIGN_CENTER_VERTICAL);
 	sizer->Add(controlsSizer, 0, wxALIGN_CENTER_VERTICAL);
 

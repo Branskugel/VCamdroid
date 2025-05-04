@@ -78,8 +78,8 @@ void ImgAdjDlg::ResetSliders(wxCommandEvent& event)
 	SendEvent(EVT_SATURATION_CHANGED, 0);
 
 	qualitySlider->SetValue(80);
-	qualitySlider->SetLabel("JPEG Quality: 80");
-	SendEvent(EVT_JPEGQUALITY_CHANGED, 0);
+	qualityLabel->SetLabel("JPEG Quality: 80");
+	SendEvent(EVT_JPEGQUALITY_CHANGED, 80);
 }
 
 void ImgAdjDlg::SendEvent(int event, int value)
