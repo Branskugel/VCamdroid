@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <thread>
+#include <wx/msw/private.h>
 #include <wx/dc.h>
 #include <wx/artprov.h>
 

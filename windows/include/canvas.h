@@ -15,7 +15,7 @@ private:
 	wxBitmap bitmap;
 
 	bool shouldDraw = false;
-	bool shorter = false;
+	int drawX, drawY;
 	
 	void OnPaint(wxPaintEvent& event);
 };

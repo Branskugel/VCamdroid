@@ -23,6 +23,7 @@ private:
 
 	scCamera camera;
 	int cameraWidth, cameraHeight;
+	int cameraAspectRatioW, cameraAspectRatioH;
 	std::unique_ptr<Server> server;
 	std::unique_ptr<Stream> stream;
 	bool backCameraActive;
@@ -30,9 +31,11 @@ private:
 	void UpdateAvailableDevices() const;
 
 	void OnMenuEvent(wxCommandEvent& event);
+	void OnResolutionChanged(wxEvent& event);
+	void ShowAdjustmentsDialog(wxCommandEvent& event);
 	void OnWindowCloseEvent(wxCloseEvent& event);
 
-	void ScCameraInit(int width, int height);
+	void SetVideoOptions(int width, int height, int aspectRatioW, int aspectRatioH, bool portrait = false);
 
 	void UpdateFrameStats(Stream::FrameStats stats);
 };

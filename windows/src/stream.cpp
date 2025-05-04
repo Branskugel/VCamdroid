@@ -35,13 +35,14 @@ void Stream::OnFrameReceived(const unsigned char* bytes, size_t length) const
 	}
 }
 
-void Stream::RotateLeft()
+int Stream::RotateLeft()
 {
 	transforms.rotation += 1;
 	transforms.rotation %= 4;
+	return transforms.rotation;
 }
 
-void Stream::RotateRight()
+int Stream::RotateRight()
 {
 	transforms.rotation -= 1;
 	transforms.rotation %= 4;
@@ -49,6 +50,8 @@ void Stream::RotateRight()
 	// Required because of how % operator works in c++, 4%-1=-1 when we need it to be 3
 	if (transforms.rotation < 0)
 		transforms.rotation = 4 + transforms.rotation;
+
+	return transforms.rotation;
 }
 
 void Stream::Mirror()

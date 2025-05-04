@@ -21,6 +21,7 @@ public:
 
 	struct Transforms
 	{
+		static const int ROTATE_0 = 0;
 		static const int ROTATE_90 = 1;
 		static const int ROTATE_180 = 2;
 		static const int ROTATE_270 = 3;
@@ -41,10 +42,10 @@ public:
 	virtual void OnFrameReceived(const unsigned char* bytes, size_t length) const override;
 	
 	/// Rotates the image stream by 90 degrees counterclockwise
-	void RotateLeft();
+	int RotateLeft();
 
 	/// Rotates the image stream by 90 degress clockwise
-	void RotateRight();
+	int RotateRight();
 
 	/// Mirror / flip the image on the horizontal axis
 	void Mirror();

@@ -7,6 +7,8 @@ Canvas::Canvas(wxWindow* parent, wxPoint position, wxSize size)
 	size(size), 
 	bitmap(size.x, size.y)
 {
+	drawX = 0;
+	drawY = 0;
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 	this->Bind(wxEVT_PAINT, &Canvas::OnPaint, this);
 }
@@ -31,13 +33,29 @@ void Canvas::SetAspectRatio(int w, int h)
 	{
 		size = wxSize(400, 300);
 		bitmap = wxBitmap(400, 300);
-		shorter = false;
+		drawX = 0;
+		drawY = 0;
 	}
 	else if (w == 16 && h == 9) 
 	{
 		size = wxSize(400, 225);
 		bitmap = wxBitmap(400, 225);
-		shorter = true;
+		drawX = 0;
+		drawY = 37;
+	}
+	else if (h == 4 && w == 3)
+	{
+		size = wxSize(225, 300);
+		bitmap = wxBitmap(225, 300);
+		drawX = 87;
+		drawY = 0;
+	}
+	else if (h == 16 && w == 9)
+	{
+		size = wxSize(169, 300);
+		bitmap = wxBitmap(169, 300);
+		drawX = 115;
+		drawY = 0;
 	}
 }
 
@@ -48,7 +66,7 @@ void Canvas::OnPaint(wxPaintEvent& event)
 	
 	if (shouldDraw)
 	{
-		dc.DrawBitmap(bitmap, 0, shorter ? 37 : 0, false);
+		dc.DrawBitmap(bitmap, drawX, drawY, false);
 	}
 	else
 	{
