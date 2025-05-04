@@ -28,6 +28,12 @@ void Receiver::Reset() const
 
 void Receiver::ReadSome(size_t bytes) const
 {
+	// TODO: Improve incoming packet handling 
+	// to allow a JPEG quality over 80 reliably.
+	// Current implementation might be laggy and have visual artifacts
+	// when the JPEG compression quality is over 80
+	
+	
 	// Second byte in the buffer is the current segment number
 	segmentsReceived = readBuffer[1];
 	if (segmentsReceived == 1)
@@ -36,13 +42,19 @@ void Receiver::ReadSome(size_t bytes) const
 		// so remember the total number of segments of this frame 
 		totalSegments = readBuffer[2];
 	}
-	
-	std::copy_n(readBuffer + 3, bytes - 3, frameBuffer + frameSize);
-	frameSize += (bytes - 3);
+
+	if (frameSize + bytes - 3 < maxFrameByteSize)
+	{
+		std::copy_n(readBuffer + 3, bytes - 3, frameBuffer + frameSize);
+		frameSize += (bytes - 3);
+	}
+
+	logger << "SEGEMENT " << segmentsReceived << " / " << totalSegments << "\n";
+	logger << bytes << " " << frameSize << " " << maxFrameByteSize << "\n";
 
 	// If we received all the bytes needed for a frame
 	// notify the listener and reset the receiving buffer
-	if (segmentsReceived == totalSegments)
+	if (segmentsReceived >= totalSegments && totalSegments > 0)
 	{
 		frameReceivedListener.OnFrameReceived(frameBuffer, frameSize);
 		Reset();
