@@ -226,7 +226,13 @@ void Application::ShowAdjustmentsDialog(wxCommandEvent& event)
 	});
 
 	dialog.Bind(EVT_WB_CHANGED, [&](const wxCommandEvent& event) {
+		stream->SetWBAdjustment(event.GetInt());
 		server->SetStreamingWB(event.GetInt());
+	});
+
+	dialog.Bind(EVT_EFFECT_CHANGED, [&](const wxCommandEvent& event) {
+		stream->SetEffectAdjustment(event.GetInt());
+		server->SetStreamingEffect(event.GetInt());
 	});
 
 	dialog.ShowModal();

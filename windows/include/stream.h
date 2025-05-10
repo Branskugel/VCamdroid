@@ -36,6 +36,7 @@ public:
 		int saturation;
 		int quality;
 		int whitebalance;
+		int effect;
 	};
 
 	Stream(OnFrameReadyCallback fn);
@@ -55,6 +56,7 @@ public:
 	void SetSaturationAdjustment(int value);
 	void SetQualityAdjustment(int value);
 	void SetWBAdjustment(int value);
+	void SetEffectAdjustment(int value);
 
 	const Adjustments& GetAdjustments();
 

@@ -7,6 +7,7 @@ wxDECLARE_EVENT(EVT_BRIGHTNESS_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SATURATION_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_JPEGQUALITY_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_WB_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_EFFECT_CHANGED, wxCommandEvent);
 
 class ImgAdjDlg : public wxDialog
 {
@@ -27,6 +28,18 @@ public:
 		"Shade"
 	};
 
+	const wxString effects[9] = {
+		"Off",
+		"Mono",
+		"Negative",
+		"Solarize",
+		"Sepia",
+		"Posterize",
+		"Whiteboard",
+		"Blackboard",
+		"Aqua"
+	};
+
 private:
 	wxStaticText* brightnessLabel;
 	wxSlider* brightnessSlider;
@@ -40,10 +53,14 @@ private:
 	wxStaticText* wbLabel;
 	wxChoice* wbChoice;
 
+	wxStaticText* effectLabel;
+	wxChoice* effectChoice;
+
 	void OnBrightnessSliderChanged(wxCommandEvent& event);
 	void OnSaturationSliderChanged(wxCommandEvent& event);
 	void OnQualitySliderChanged(wxCommandEvent& event);
 	void OnWBChoiceChanged(wxCommandEvent& event);
+	void OnEffectChoiceChanged(wxCommandEvent& event);
 
 	void ResetSliders(wxCommandEvent& event);
 	void SendEvent(int event, int value);

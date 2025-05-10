@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
             this,
             this
         )
-        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO)
+        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO, CaptureRequest.CONTROL_EFFECT_MODE_OFF)
 
         // Prioritize the usb connection through adb
         if (hasUsbConnection()) {
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     override fun onResume() {
         super.onResume()
         connectionManager = ConnectionManager.getInstance(this)
-        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO)
+        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO, CaptureRequest.CONTROL_EFFECT_MODE_OFF)
         connectWIFI()
     }
 

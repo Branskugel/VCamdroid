@@ -33,6 +33,7 @@ public:
 		static const int CAMERA = 0x03;
 		static const int QUALITY = 0x04;
 		static const int WB = 0x05;
+		static const int EFFECT = 0x06;
 	};
 
 	struct ConnectionListener
@@ -57,11 +58,14 @@ public:
 
 	void Start();
 	void Close();
+
 	void SetStreamResolution(unsigned short width, unsigned short height);
 	void SetStreamingDevice(int device);
 	void SetStreamingCamera(bool back = true);
 	void SetStreamingQuality(uint8_t quality);
 	void SetStreamingWB(int wb);
+	void SetStreamingEffect(int effect);
+
 	int GetStreamingDevice();
 
 	std::vector<DeviceInfo> GetConnectedDevicesInfo();

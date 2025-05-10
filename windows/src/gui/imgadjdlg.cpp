@@ -4,11 +4,12 @@ wxDEFINE_EVENT(EVT_BRIGHTNESS_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SATURATION_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_JPEGQUALITY_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_WB_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_EFFECT_CHANGED, wxCommandEvent);
 
 ImgAdjDlg::ImgAdjDlg(wxWindow* parent, const Stream::Adjustments& initial) : wxDialog(parent, wxID_ANY, "Image adjustments")
 {
 	auto sizer = new wxBoxSizer(wxVERTICAL);
-	auto sliders = new wxGridSizer(4, 2, 0, 0);
+	auto sliders = new wxGridSizer(5, 2, 0, 0);
 	auto buttons = new wxBoxSizer(wxHORIZONTAL);
 
 	brightnessLabel = new wxStaticText(this, wxID_ANY, wxString::Format("Brightness: %d%%", initial.brightness));
@@ -28,6 +29,11 @@ ImgAdjDlg::ImgAdjDlg(wxWindow* parent, const Stream::Adjustments& initial) : wxD
 	wbChoice->SetSelection(initial.whitebalance);
 	wbChoice->Bind(wxEVT_CHOICE, &ImgAdjDlg::OnWBChoiceChanged, this);
 
+	effectLabel = new wxStaticText(this, wxID_ANY, "Filter effect");
+	effectChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 9, effects);
+	effectChoice->SetSelection(initial.effect);
+	effectChoice->Bind(wxEVT_CHOICE, &ImgAdjDlg::OnEffectChoiceChanged, this);
+
 	sliders->Add(brightnessLabel);
 	sliders->Add(brightnessSlider);
 
@@ -39,6 +45,9 @@ ImgAdjDlg::ImgAdjDlg(wxWindow* parent, const Stream::Adjustments& initial) : wxD
 
 	sliders->Add(wbLabel);
 	sliders->Add(wbChoice);
+
+	sliders->Add(effectLabel);
+	sliders->Add(effectChoice);
 
 	auto okbutton = new wxButton(this, wxID_ANY, "OK");
 	okbutton->Bind(wxEVT_BUTTON, [&](const wxCommandEvent& event) { this->Close(); });
@@ -81,6 +90,11 @@ void ImgAdjDlg::OnWBChoiceChanged(wxCommandEvent& event)
 	SendEvent(EVT_WB_CHANGED, event.GetSelection());
 }
 
+void ImgAdjDlg::OnEffectChoiceChanged(wxCommandEvent& event)
+{
+	SendEvent(EVT_EFFECT_CHANGED, event.GetSelection());
+}
+
 void ImgAdjDlg::ResetSliders(wxCommandEvent& event)
 {
 	brightnessSlider->SetValue(0);
@@ -97,6 +111,9 @@ void ImgAdjDlg::ResetSliders(wxCommandEvent& event)
 
 	wbChoice->SetSelection(1);
 	SendEvent(EVT_WB_CHANGED, 1);
+
+	effectChoice->SetSelection(0);
+	SendEvent(EVT_EFFECT_CHANGED, 0);
 }
 
 void ImgAdjDlg::SendEvent(int event, int value)

@@ -64,6 +64,9 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
                 ConnectionManager.PacketType.WB -> {
                     camera.start(buffer[1].toInt())
                 }
+                ConnectionManager.PacketType.EFFECT -> {
+                    camera.start(buffer[1].toShort())
+                }
             }
         }
     }

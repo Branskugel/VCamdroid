@@ -143,6 +143,15 @@ void Server::SetStreamingWB(int wb)
 	}
 }
 
+void Server::SetStreamingEffect(int effect)
+{
+	unsigned char bytes[2] = { PacketType::EFFECT, effect };
+	for (auto& conn : connections)
+	{
+		conn->Send(bytes, 2);
+	}
+}
+
 int Server::GetStreamingDevice()
 {
 	for (int i = 0; i < connections.size(); i++)
