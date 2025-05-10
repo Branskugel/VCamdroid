@@ -49,7 +49,11 @@ void Connection::Close(bool stoppedByServer)
 {
 	if (stoppedByServer)
 	{
-		socket.cancel();
+		// Sometimes socket.cancel() makes the app to not respond
+		// but sometimes is required to successfully remove the adb
+		// port forwarding
+		// TODO...
+		//socket.cancel();
 		socket.close();
 	}
 	else

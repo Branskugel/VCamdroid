@@ -49,9 +49,6 @@ void Receiver::ReadSome(size_t bytes) const
 		frameSize += (bytes - 3);
 	}
 
-	logger << "SEGEMENT " << segmentsReceived << " / " << totalSegments << "\n";
-	logger << bytes << " " << frameSize << " " << maxFrameByteSize << "\n";
-
 	// If we received all the bytes needed for a frame
 	// notify the listener and reset the receiving buffer
 	if (segmentsReceived >= totalSegments && totalSegments > 0)
