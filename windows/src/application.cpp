@@ -225,6 +225,10 @@ void Application::ShowAdjustmentsDialog(wxCommandEvent& event)
 		server->SetStreamingQuality(event.GetInt());
 	});
 
+	dialog.Bind(EVT_WB_CHANGED, [&](const wxCommandEvent& event) {
+		server->SetStreamingWB(event.GetInt());
+	});
+
 	dialog.ShowModal();
 }
 

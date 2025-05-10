@@ -134,6 +134,15 @@ void Server::SetStreamingQuality(uint8_t quality)
 	}
 }
 
+void Server::SetStreamingWB(int wb)
+{
+	unsigned char bytes[2] = { PacketType::WB, wb };
+	for (auto& conn : connections)
+	{
+		conn->Send(bytes, 2);
+	}
+}
+
 int Server::GetStreamingDevice()
 {
 	for (int i = 0; i < connections.size(); i++)

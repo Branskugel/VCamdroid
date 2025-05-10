@@ -3,11 +3,12 @@
 wxDEFINE_EVENT(EVT_BRIGHTNESS_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SATURATION_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_JPEGQUALITY_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_WB_CHANGED, wxCommandEvent);
 
 ImgAdjDlg::ImgAdjDlg(wxWindow* parent, const Stream::Adjustments& initial) : wxDialog(parent, wxID_ANY, "Image adjustments")
 {
 	auto sizer = new wxBoxSizer(wxVERTICAL);
-	auto sliders = new wxGridSizer(3, 2, 0, 0);
+	auto sliders = new wxGridSizer(4, 2, 0, 0);
 	auto buttons = new wxBoxSizer(wxHORIZONTAL);
 
 	brightnessLabel = new wxStaticText(this, wxID_ANY, wxString::Format("Brightness: %d%%", initial.brightness));
@@ -22,6 +23,11 @@ ImgAdjDlg::ImgAdjDlg(wxWindow* parent, const Stream::Adjustments& initial) : wxD
 	qualitySlider = new wxSlider(this, wxID_ANY, initial.quality, 0, 100);
 	qualitySlider->Bind(wxEVT_SLIDER, &ImgAdjDlg::OnQualitySliderChanged, this);
 
+	wbLabel = new wxStaticText(this, wxID_ANY, "White balance");
+	wbChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 9, whiteBalances);
+	wbChoice->SetSelection(initial.whitebalance);
+	wbChoice->Bind(wxEVT_CHOICE, &ImgAdjDlg::OnWBChoiceChanged, this);
+
 	sliders->Add(brightnessLabel);
 	sliders->Add(brightnessSlider);
 
@@ -30,6 +36,9 @@ ImgAdjDlg::ImgAdjDlg(wxWindow* parent, const Stream::Adjustments& initial) : wxD
 
 	sliders->Add(qualityLabel);
 	sliders->Add(qualitySlider);
+
+	sliders->Add(wbLabel);
+	sliders->Add(wbChoice);
 
 	auto okbutton = new wxButton(this, wxID_ANY, "OK");
 	okbutton->Bind(wxEVT_BUTTON, [&](const wxCommandEvent& event) { this->Close(); });
@@ -67,6 +76,11 @@ void ImgAdjDlg::OnQualitySliderChanged(wxCommandEvent& event)
 	SendEvent(EVT_JPEGQUALITY_CHANGED, event.GetInt());
 }
 
+void ImgAdjDlg::OnWBChoiceChanged(wxCommandEvent& event)
+{
+	SendEvent(EVT_WB_CHANGED, event.GetSelection());
+}
+
 void ImgAdjDlg::ResetSliders(wxCommandEvent& event)
 {
 	brightnessSlider->SetValue(0);
@@ -80,6 +94,9 @@ void ImgAdjDlg::ResetSliders(wxCommandEvent& event)
 	qualitySlider->SetValue(80);
 	qualityLabel->SetLabel("JPEG Quality: 80");
 	SendEvent(EVT_JPEGQUALITY_CHANGED, 80);
+
+	wbChoice->SetSelection(1);
+	SendEvent(EVT_WB_CHANGED, 1);
 }
 
 void ImgAdjDlg::SendEvent(int event, int value)

@@ -61,6 +61,9 @@ class StreamActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCal
                 ConnectionManager.PacketType.QUALITY -> {
                     jpegQuality = buffer[1].toInt()
                 }
+                ConnectionManager.PacketType.WB -> {
+                    camera.start(buffer[1].toInt())
+                }
             }
         }
     }

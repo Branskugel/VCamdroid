@@ -53,6 +53,7 @@ class ConnectionManager private constructor() : Connection.Listener {
             const val ACTIVATION: Byte = 0x02
             const val CAMERA: Byte = 0x03
             const val QUALITY: Byte = 0x04
+            const val WB: Byte = 0x05
         }
     }
 

@@ -2,8 +2,12 @@ package com.darusc.vcamdroid.video
 
 import android.content.Context
 import android.graphics.Rect
+import android.hardware.camera2.CaptureRequest
 import android.util.Log
 import android.util.Size
+import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.Camera2Interop
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageAnalysis.Analyzer
@@ -13,7 +17,6 @@ import androidx.camera.core.Preview.SurfaceProvider
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.util.concurrent.ExecutorService
@@ -37,6 +40,7 @@ class Camera(
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private lateinit var resolution: Size
     private lateinit var cameraSelector: CameraSelector
+    private var awbMode: Int = CaptureRequest.CONTROL_AWB_MODE_AUTO
 
     val aspectRation: String
         get() {
@@ -52,48 +56,70 @@ class Camera(
             .setResolutionStrategy(ResolutionStrategy(resolution, ResolutionStrategy.FALLBACK_RULE_NONE))
             .build()
 
-    private fun buildPreview(resolutionSelector: ResolutionSelector, surface: SurfaceProvider) =
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun buildPreview(resolutionSelector: ResolutionSelector, surface: SurfaceProvider, awb: Int) =
         Preview.Builder()
             .setResolutionSelector(resolutionSelector)
+            .apply {
+                Camera2Interop.Extender(this).apply {
+                    setCaptureRequestOption(CaptureRequest.CONTROL_AWB_MODE, awb)
+                }
+            }
             .build()
             .apply {
                 surfaceProvider = surface
             }
 
-    private fun buildAnalyzer(resolutionSelector: ResolutionSelector, analyzer: Analyzer) =
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun buildAnalyzer(resolutionSelector: ResolutionSelector, awb: Int, analyzer: Analyzer) =
         ImageAnalysis.Builder()
             .setResolutionSelector(resolutionSelector)
             .setOutputImageFormat(format)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .apply {
+                Camera2Interop.Extender(this).apply {
+                    setCaptureRequestOption(CaptureRequest.CONTROL_AWB_MODE, awb)
+                }
+            }
             .build()
             .apply {
                 setAnalyzer(cameraExecutor, analyzer)
             }
 
     /**
-     * Defaults to a resolution of 640x480 and to the back camera
+     * Defaults to a resolution of 640x480 and to the back camera with a WB set to auto
      */
     fun start() {
-        start(Size(640, 480), CameraSelector.DEFAULT_BACK_CAMERA)
+        start(Size(640, 480), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO)
     }
 
     /**
-     * Start with the implicit resolution and a given camera
+     * Start with the implicit resolution and white balance and a given camera
      */
     fun start(cameraSelector: CameraSelector) {
-        start(resolution, cameraSelector)
+        start(resolution, cameraSelector, awbMode)
     }
 
     /**
-     * Start with the implicit cameraSelector and a given resolution
+     * Start with the implicit cameraSelector and white balance and a given resolution
      */
     fun start(resolution: Size) {
-        start(resolution, cameraSelector)
+        start(resolution, cameraSelector, awbMode)
     }
 
-    fun start(resolution: Size, cameraSelector: CameraSelector) {
+    /**
+     * Start with the implicit cameraSelector and resolution and a given white balance mode
+     */
+    fun start(awb: Int) {
+        start(resolution, cameraSelector, awb)
+    }
+
+    @OptIn(ExperimentalCamera2Interop::class)
+    fun start(resolution: Size, cameraSelector: CameraSelector, awb: Int) {
         this.resolution = resolution
         this.cameraSelector = cameraSelector
+        this.awbMode = awb
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
@@ -101,9 +127,8 @@ class Camera(
             val resolutionSelector = buildResolutionSelector(resolution)
             val cameraProvider = cameraProviderFuture.get()
 
-            val preview = buildPreview(resolutionSelector, surface)
-
-            val imageAnalyzer = buildAnalyzer(resolutionSelector) { image ->
+            val preview = buildPreview(resolutionSelector, surface, awb)
+            val imageAnalyzer = buildAnalyzer(resolutionSelector, awb) { image ->
                 imageReadyListener(image)
             }
 

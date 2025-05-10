@@ -35,6 +35,7 @@ public:
 		int brightness;
 		int saturation;
 		int quality;
+		int whitebalance;
 	};
 
 	Stream(OnFrameReadyCallback fn);
@@ -53,6 +54,7 @@ public:
 	void SetBrightnessAdjustment(int value);
 	void SetSaturationAdjustment(int value);
 	void SetQualityAdjustment(int value);
+	void SetWBAdjustment(int value);
 
 	const Adjustments& GetAdjustments();
 

@@ -74,6 +74,11 @@ void Stream::SetQualityAdjustment(int value)
 	adjustments.quality = value;
 }
 
+void Stream::SetWBAdjustment(int value)
+{
+	adjustments.whitebalance = value;
+}
+
 const Stream::Adjustments& Stream::GetAdjustments()
 {
 	return adjustments;

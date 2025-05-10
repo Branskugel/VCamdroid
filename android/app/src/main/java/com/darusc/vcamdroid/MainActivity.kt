@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Rect
+import android.hardware.camera2.CaptureRequest
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.appcompat.app.AppCompatActivity
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
             this,
             this
         )
-        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA)
+        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO)
 
         // Prioritize the usb connection through adb
         if (hasUsbConnection()) {
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity(), ConnectionManager.ConnectionStateCallb
     override fun onResume() {
         super.onResume()
         connectionManager = ConnectionManager.getInstance(this)
-        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA)
+        camera.start(Size(1280, 720), CameraSelector.DEFAULT_BACK_CAMERA, CaptureRequest.CONTROL_AWB_MODE_AUTO)
         connectWIFI()
     }
 
