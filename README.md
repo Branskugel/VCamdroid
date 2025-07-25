@@ -35,6 +35,8 @@ First **enable developer mode** - go to **Settings > About**. Find the **Build n
   Build number and developer options location might vary based on your phone model and android version. See https://developer.android.com/studio/debug/dev-options for more details.
 
 ## How to use
+_First of all, make sure you have given the app permission to use the camera in settings._
+
 **If you want to connect with a USB cable you must do the following:**
 - Enable usb debugging on your phone. See the last section of **How to install**
 - Plug in your phone to your pc.
